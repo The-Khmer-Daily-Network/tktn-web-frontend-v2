@@ -1,10 +1,11 @@
+import { getApiUrl, isApiConfigured } from "@/lib/api-url";
+import { getAdminHeaders } from "@/services/auth";
 import type {
-  ArticlesResponse,
   Article,
   ArticleContentBlock,
   ArticleEndImage,
+  ArticlesResponse,
 } from "@/types/article";
-import { getAdminHeaders } from "@/services/auth";
 
 export interface ArticleByIdResponse {
   success: boolean;
@@ -60,23 +61,10 @@ export interface ArticleDeleteResponse {
   message: string;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-if (!API_BASE_URL) {
+if (!isApiConfigured()) {
   console.warn(
     "NEXT_PUBLIC_API_BASE_URL is not defined in environment variables",
   );
-}
-
-function getApiUrl(path: string): string {
-  if (!API_BASE_URL) {
-    throw new Error(
-      "NEXT_PUBLIC_API_BASE_URL is not defined in environment variables",
-    );
-  }
-  const baseUrl = API_BASE_URL.replace(/\/$/, "");
-  const apiPath = path.startsWith("/") ? path : `/${path}`;
-  return `${baseUrl}${apiPath}`;
 }
 
 export interface GetArticlesOptions {

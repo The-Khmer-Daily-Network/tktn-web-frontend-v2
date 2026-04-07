@@ -1,15 +1,14 @@
+import { getApiUrl, isApiConfigured } from "@/lib/api-url";
 import type {
-  CategoryResponse,
   CategoryCreateParams,
-  CategoryUpdateParams,
   CategoryCreateResponse,
-  CategoryUpdateResponse,
   CategoryDeleteResponse,
+  CategoryResponse,
+  CategoryUpdateParams,
+  CategoryUpdateResponse,
 } from "@/types/category";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-if (!API_BASE_URL) {
+if (!isApiConfigured()) {
   console.warn(
     "NEXT_PUBLIC_API_BASE_URL is not defined in environment variables",
   );
@@ -20,25 +19,6 @@ let categoriesInFlight: Promise<CategoryResponse> | null = null;
 /** Cache result so follow-up calls within 1 min don't refetch. */
 let categoriesCache: { data: CategoryResponse; at: number } | null = null;
 const CACHE_MS = 60_000;
-
-/**
- * Get the full API URL with proper path
- */
-function getApiUrl(path: string): string {
-  if (!API_BASE_URL) {
-    throw new Error(
-      "NEXT_PUBLIC_API_BASE_URL is not defined in environment variables",
-    );
-  }
-
-  // Remove trailing slash from API_BASE_URL if present
-  const baseUrl = API_BASE_URL.replace(/\/$/, "");
-  // Ensure path starts with /
-  const apiPath = path.startsWith("/") ? path : `/${path}`;
-
-  // Simply concatenate baseUrl and path since baseUrl already includes /api
-  return `${baseUrl}${apiPath}`;
-}
 
 /**
  * Fetch all categories with subcategories.

@@ -1,23 +1,11 @@
+import { getApiUrl } from "@/lib/api-url";
+import { getAdminHeaders, getStoredUser } from "@/services/auth";
 import type {
-  User,
-  UserResponse,
   CreateUserPayload,
   RemovalRequest,
+  User,
+  UserResponse,
 } from "@/types/auth";
-import { getStoredUser, getAdminHeaders } from "@/services/auth";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-function getApiUrl(path: string): string {
-  if (!API_BASE_URL) {
-    throw new Error(
-      "NEXT_PUBLIC_API_BASE_URL is not defined in environment variables",
-    );
-  }
-  const baseUrl = API_BASE_URL.replace(/\/$/, "");
-  const apiPath = path.startsWith("/") ? path : `/${path}`;
-  return `${baseUrl}${apiPath}`;
-}
 
 /**
  * List all users (SME only). Uses same GET /user as auth.
@@ -29,7 +17,8 @@ export async function listUsers(): Promise<User[]> {
     credentials: "omit",
     mode: "cors",
   });
-  if (!response.ok) throw new Error(`Failed to list users: ${response.statusText}`);
+  if (!response.ok)
+    throw new Error(`Failed to list users: ${response.statusText}`);
   const data: UserResponse = await response.json();
   return data.success && Array.isArray(data.data) ? data.data : [];
 }
@@ -37,7 +26,9 @@ export async function listUsers(): Promise<User[]> {
 /**
  * Create a new user (SME only). POST /user
  */
-export async function createUser(payload: CreateUserPayload): Promise<{ success: boolean; message?: string; data?: User }> {
+export async function createUser(
+  payload: CreateUserPayload,
+): Promise<{ success: boolean; message?: string; data?: User }> {
   const response = await fetch(getApiUrl("/user"), {
     method: "POST",
     headers: getAdminHeaders(),
@@ -47,7 +38,9 @@ export async function createUser(payload: CreateUserPayload): Promise<{ success:
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(data?.message || `Failed to create user: ${response.statusText}`);
+    throw new Error(
+      data?.message || `Failed to create user: ${response.statusText}`,
+    );
   }
   return data;
 }
@@ -55,7 +48,9 @@ export async function createUser(payload: CreateUserPayload): Promise<{ success:
 /**
  * Delete a user by id. Non-SME can be deleted directly; SME requires removal-request flow.
  */
-export async function deleteUser(id: number): Promise<{ success: boolean; message?: string }> {
+export async function deleteUser(
+  id: number,
+): Promise<{ success: boolean; message?: string }> {
   const response = await fetch(getApiUrl(`/user/${id}`), {
     method: "DELETE",
     headers: getAdminHeaders(),
@@ -64,7 +59,9 @@ export async function deleteUser(id: number): Promise<{ success: boolean; messag
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(data?.message || `Failed to delete user: ${response.statusText}`);
+    throw new Error(
+      data?.message || `Failed to delete user: ${response.statusText}`,
+    );
   }
   return data;
 }
@@ -73,7 +70,9 @@ export async function deleteUser(id: number): Promise<{ success: boolean; messag
  * Request removal of another SME (creates pending; target must accept/decline).
  * POST /user/removal-request
  */
-export async function createRemovalRequest(targetUserId: number): Promise<{ success: boolean; data?: RemovalRequest; message?: string }> {
+export async function createRemovalRequest(
+  targetUserId: number,
+): Promise<{ success: boolean; data?: RemovalRequest; message?: string }> {
   const response = await fetch(getApiUrl("/user/removal-request"), {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -83,7 +82,9 @@ export async function createRemovalRequest(targetUserId: number): Promise<{ succ
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(data?.message || `Failed to request removal: ${response.statusText}`);
+    throw new Error(
+      data?.message || `Failed to request removal: ${response.statusText}`,
+    );
   }
   return data;
 }
@@ -104,22 +105,34 @@ export async function getMyRemovalRequests(): Promise<RemovalRequest[]> {
   if (!response.ok) return [];
   const data = await response.json().catch(() => ({}));
   const list = data?.data ?? data?.removal_requests ?? [];
-  return Array.isArray(list) ? list.filter((r: RemovalRequest) => r.status === "pending") : [];
+  return Array.isArray(list)
+    ? list.filter((r: RemovalRequest) => r.status === "pending")
+    : [];
 }
 
 /**
  * Accept a removal request (delete own account).
  */
-export async function acceptRemovalRequest(requestId: number): Promise<{ success: boolean; message?: string }> {
-  const response = await fetch(getApiUrl(`/user/removal-requests/${requestId}/accept`), {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
-    credentials: "omit",
-    mode: "cors",
-  });
+export async function acceptRemovalRequest(
+  requestId: number,
+): Promise<{ success: boolean; message?: string }> {
+  const response = await fetch(
+    getApiUrl(`/user/removal-requests/${requestId}/accept`),
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      credentials: "omit",
+      mode: "cors",
+    },
+  );
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(data?.message || `Failed to accept: ${response.statusText}`);
+    throw new Error(
+      data?.message || `Failed to accept: ${response.statusText}`,
+    );
   }
   return data;
 }
@@ -127,16 +140,26 @@ export async function acceptRemovalRequest(requestId: number): Promise<{ success
 /**
  * Decline a removal request.
  */
-export async function declineRemovalRequest(requestId: number): Promise<{ success: boolean; message?: string }> {
-  const response = await fetch(getApiUrl(`/user/removal-requests/${requestId}/decline`), {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
-    credentials: "omit",
-    mode: "cors",
-  });
+export async function declineRemovalRequest(
+  requestId: number,
+): Promise<{ success: boolean; message?: string }> {
+  const response = await fetch(
+    getApiUrl(`/user/removal-requests/${requestId}/decline`),
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      credentials: "omit",
+      mode: "cors",
+    },
+  );
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(data?.message || `Failed to decline: ${response.statusText}`);
+    throw new Error(
+      data?.message || `Failed to decline: ${response.statusText}`,
+    );
   }
   return data;
 }
@@ -146,7 +169,11 @@ export async function declineRemovalRequest(requestId: number): Promise<{ succes
  */
 export async function changeMyPassword(
   userId: number,
-  payload: { old_password: string; new_password: string; confirm_password: string },
+  payload: {
+    old_password: string;
+    new_password: string;
+    confirm_password: string;
+  },
 ): Promise<{ success: boolean; message?: string }> {
   const response = await fetch(getApiUrl(`/user/${userId}/change-password`), {
     method: "POST",
@@ -157,7 +184,9 @@ export async function changeMyPassword(
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(data?.message || `Failed to change password: ${response.statusText}`);
+    throw new Error(
+      data?.message || `Failed to change password: ${response.statusText}`,
+    );
   }
   return data;
 }

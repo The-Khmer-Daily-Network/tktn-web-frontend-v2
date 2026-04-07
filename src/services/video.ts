@@ -1,11 +1,12 @@
+import { getApiUrl, isApiConfigured } from "@/lib/api-url";
+import { getAdminHeaders } from "@/services/auth";
 import type {
-  VideosResponse,
   Video,
   VideoByIdResponse,
   VideoContentBlock,
   VideoEndImage,
+  VideosResponse,
 } from "@/types/video";
-import { getAdminHeaders } from "@/services/auth";
 
 export interface VideoCreateParams {
   category_id?: number | null;
@@ -58,23 +59,10 @@ export interface VideoDeleteResponse {
   message: string;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-if (!API_BASE_URL) {
+if (!isApiConfigured()) {
   console.warn(
     "NEXT_PUBLIC_API_BASE_URL is not defined in environment variables",
   );
-}
-
-function getApiUrl(path: string): string {
-  if (!API_BASE_URL) {
-    throw new Error(
-      "NEXT_PUBLIC_API_BASE_URL is not defined in environment variables",
-    );
-  }
-  const baseUrl = API_BASE_URL.replace(/\/$/, "");
-  const apiPath = path.startsWith("/") ? path : `/${path}`;
-  return `${baseUrl}${apiPath}`;
 }
 
 export interface GetVideosOptions {
@@ -212,9 +200,7 @@ export async function updateVideo(
 /**
  * Admin: delete video (DELETE /admin/videos/{id}).
  */
-export async function deleteVideo(
-  id: number,
-): Promise<VideoDeleteResponse> {
+export async function deleteVideo(id: number): Promise<VideoDeleteResponse> {
   const url = getApiUrl(`${ADMIN_VIDEOS_BASE}/${id}`);
   const response = await fetch(url, {
     method: "DELETE",

@@ -1,25 +1,23 @@
-import { MetadataRoute } from 'next';
-import { categoryNameToSlug } from '@/utils/slug';
+import type { MetadataRoute } from "next";
+import { getApiBaseUrl, isApiConfigured } from "@/lib/api-url";
+import { categoryNameToSlug } from "@/utils/slug";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-const API_BASE_URL =
-  process.env.API_BASE_URL ||
-  process.env.NEXT_PUBLIC_API_BASE_URL ||
-  process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/api\/?$/, '') + '/api';
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.thekhmertoday.news';
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://www.thekhmertoday.news";
 
 /**
  * Fetch all published articles for the sitemap.
  * Uses /articles with pagination and cache: 'no-store' so new content appears quickly.
  */
 async function getAllNews() {
-  if (!API_BASE_URL) {
+  if (!isApiConfigured()) {
     return [];
   }
 
   try {
-    const baseUrl = API_BASE_URL.replace(/\/$/, '');
+    const baseUrl = getApiBaseUrl().replace(/\/$/, "");
     const perPage = 100;
     let currentPage = 1;
     let lastPage = 1;
@@ -29,10 +27,10 @@ async function getAllNews() {
       const url = `${baseUrl}/articles?page=${currentPage}&per_page=${perPage}`;
 
       const response = await fetch(url, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
+          "Content-Type": "application/json",
+          Accept: "application/json",
         },
         next: { revalidate: 300 },
       });
@@ -48,13 +46,14 @@ async function getAllNews() {
 
       allArticles.push(...data.data);
       const meta = data.meta || {};
-      lastPage = typeof meta.last_page === 'number' ? meta.last_page : currentPage;
+      lastPage =
+        typeof meta.last_page === "number" ? meta.last_page : currentPage;
       currentPage += 1;
     } while (currentPage <= lastPage);
 
     return allArticles;
   } catch (error) {
-    console.error('Error fetching news for sitemap:', error);
+    console.error("Error fetching news for sitemap:", error);
     return [];
   }
 }
@@ -64,12 +63,12 @@ async function getAllNews() {
  * Uses /videos with pagination and cache: 'no-store'.
  */
 async function getAllVideos() {
-  if (!API_BASE_URL) {
+  if (!isApiConfigured()) {
     return [];
   }
 
   try {
-    const baseUrl = API_BASE_URL.replace(/\/$/, '');
+    const baseUrl = getApiBaseUrl().replace(/\/$/, "");
     const perPage = 100;
     let currentPage = 1;
     let lastPage = 1;
@@ -79,10 +78,10 @@ async function getAllVideos() {
       const url = `${baseUrl}/videos?page=${currentPage}&per_page=${perPage}`;
 
       const response = await fetch(url, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
+          "Content-Type": "application/json",
+          Accept: "application/json",
         },
         next: { revalidate: 300 },
       });
@@ -98,31 +97,32 @@ async function getAllVideos() {
 
       allVideos.push(...data.data);
       const meta = data.meta || {};
-      lastPage = typeof meta.last_page === 'number' ? meta.last_page : currentPage;
+      lastPage =
+        typeof meta.last_page === "number" ? meta.last_page : currentPage;
       currentPage += 1;
     } while (currentPage <= lastPage);
 
     return allVideos;
   } catch (error) {
-    console.error('Error fetching videos for sitemap:', error);
+    console.error("Error fetching videos for sitemap:", error);
     return [];
   }
 }
 
 async function getCategories() {
-  if (!API_BASE_URL) {
+  if (!isApiConfigured()) {
     return [];
   }
 
   try {
-    const baseUrl = API_BASE_URL.replace(/\/$/, '');
+    const baseUrl = getApiBaseUrl().replace(/\/$/, "");
     const url = `${baseUrl}/categories`;
 
     const response = await fetch(url, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
+        "Content-Type": "application/json",
+        Accept: "application/json",
       },
       next: { revalidate: 3600 },
     });
@@ -134,7 +134,7 @@ async function getCategories() {
     const data = await response.json();
     return data.categories || [];
   } catch (error) {
-    console.error('Error fetching categories for sitemap:', error);
+    console.error("Error fetching categories for sitemap:", error);
     return [];
   }
 }
@@ -147,19 +147,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     {
       url: baseUrl,
       lastModified: new Date(),
-      changeFrequency: 'daily',
+      changeFrequency: "daily",
       priority: 1.0,
     },
     {
       url: `${baseUrl}/about-us`,
       lastModified: new Date(),
-      changeFrequency: 'monthly',
+      changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: `${baseUrl}/video`,
       lastModified: new Date(),
-      changeFrequency: 'daily',
+      changeFrequency: "daily",
       priority: 0.9,
     },
   ];
@@ -169,7 +169,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const newsPages: MetadataRoute.Sitemap = allNews.map((article: any) => ({
     url: `${baseUrl}/news/${article.id}`,
     lastModified: new Date(article.updated_at || article.created_at),
-    changeFrequency: 'weekly' as const,
+    changeFrequency: "weekly" as const,
     priority: 0.8,
   }));
 
@@ -178,7 +178,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const videoPages: MetadataRoute.Sitemap = allVideos.map((video: any) => ({
     url: `${baseUrl}/news/v-${video.id}`,
     lastModified: new Date(video.updated_at || video.created_at),
-    changeFrequency: 'weekly' as const,
+    changeFrequency: "weekly" as const,
     priority: 0.8,
   }));
 
@@ -192,7 +192,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     categoryPages.push({
       url: `${baseUrl}/${slug}`,
       lastModified: new Date(),
-      changeFrequency: 'daily' as const,
+      changeFrequency: "daily" as const,
       priority: 0.7,
     });
 
@@ -203,7 +203,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         categoryPages.push({
           url: `${baseUrl}/${subSlug}`,
           lastModified: new Date(),
-          changeFrequency: 'daily' as const,
+          changeFrequency: "daily" as const,
           priority: 0.6,
         });
       });
@@ -214,7 +214,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   categoryPages.push({
     url: `${baseUrl}/latest`,
     lastModified: new Date(),
-    changeFrequency: 'daily' as const,
+    changeFrequency: "daily" as const,
     priority: 0.9,
   });
 

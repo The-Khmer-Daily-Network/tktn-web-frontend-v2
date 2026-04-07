@@ -1,7 +1,8 @@
-import type { ArticleDashboardItem } from "@/features/userFeature/newsDashboard";
-import type { NationalNewsItem } from "@/features/userFeature/nationalNews";
 import type { InternationalNewsItem } from "@/features/userFeature/internationalNews";
+import type { NationalNewsItem } from "@/features/userFeature/nationalNews";
+import type { ArticleDashboardItem } from "@/features/userFeature/newsDashboard";
 import type { VideoNewsItem } from "@/features/userFeature/videoNews";
+import { getApiUrl } from "@/lib/api-url";
 
 export interface HomePageData {
   dashboard: ArticleDashboardItem[];
@@ -13,19 +14,6 @@ export interface HomePageData {
 export interface HomePageResponse {
   success: boolean;
   data: HomePageData;
-}
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-function getApiUrl(path: string): string {
-  if (!API_BASE_URL) {
-    throw new Error(
-      "NEXT_PUBLIC_API_BASE_URL is not defined in environment variables"
-    );
-  }
-  const baseUrl = API_BASE_URL.replace(/\/$/, "");
-  const apiPath = path.startsWith("/") ? path : `/${path}`;
-  return `${baseUrl}${apiPath}`;
 }
 
 /**
@@ -49,7 +37,7 @@ export async function getHomePageData(): Promise<HomePageResponse> {
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(
-      `Failed to fetch home data: ${response.status} ${response.statusText}. ${errorText}`
+      `Failed to fetch home data: ${response.status} ${response.statusText}. ${errorText}`,
     );
   }
 

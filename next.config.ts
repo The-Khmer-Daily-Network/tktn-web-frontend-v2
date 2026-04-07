@@ -1,6 +1,18 @@
 import type { NextConfig } from "next";
 
+/** Used only when NEXT_PUBLIC_API_PROXY=1: browser hits /api-proxy/*, Next rewrites to this host's /api/*. */
+const API_UPSTREAM_ORIGIN =
+  process.env.API_UPSTREAM_ORIGIN ?? "https://api.thekhmertoday.news";
+
 const nextConfig: NextConfig = {
+  async rewrites() {
+    return [
+      {
+        source: "/api-proxy/:path*",
+        destination: `${API_UPSTREAM_ORIGIN.replace(/\/$/, "")}/api/:path*`,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {

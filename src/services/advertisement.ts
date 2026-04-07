@@ -1,41 +1,21 @@
+import { getApiUrl, isApiConfigured } from "@/lib/api-url";
 import type {
+  AdvertisementCreateParams,
+  AdvertisementCreateResponse,
+  AdvertisementDeleteResponse,
+  AdvertisementImageDeleteResponse,
   AdvertisementImageResponse,
   AdvertisementImageUploadParams,
   AdvertisementImageUploadResponse,
-  AdvertisementImageDeleteResponse,
   AdvertisementResponse,
-  AdvertisementCreateParams,
   AdvertisementUpdateParams,
-  AdvertisementCreateResponse,
   AdvertisementUpdateResponse,
-  AdvertisementDeleteResponse,
 } from "@/types/advertisement";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-if (!API_BASE_URL) {
+if (!isApiConfigured()) {
   console.warn(
     "NEXT_PUBLIC_API_BASE_URL is not defined in environment variables",
   );
-}
-
-/**
- * Get the full API URL with proper path
- */
-function getApiUrl(path: string): string {
-  if (!API_BASE_URL) {
-    throw new Error(
-      "NEXT_PUBLIC_API_BASE_URL is not defined in environment variables",
-    );
-  }
-
-  // Remove trailing slash from API_BASE_URL if present
-  const baseUrl = API_BASE_URL.replace(/\/$/, "");
-  // Ensure path starts with /
-  const apiPath = path.startsWith("/") ? path : `/${path}`;
-
-  // Simply concatenate baseUrl and path since baseUrl already includes /api
-  return `${baseUrl}${apiPath}`;
 }
 
 /**

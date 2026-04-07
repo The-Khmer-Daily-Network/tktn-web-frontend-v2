@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { cache } from "react";
-import { notFound } from "next/navigation";
-import NewsPageContent from "./NewsPageContent";
-import ArticleJsonLd from "./ArticleJsonLd";
+import { getApiBaseUrl, isApiConfigured } from "@/lib/api-url";
 import { getFirstSentenceFromContent } from "@/utils/article";
+import ArticleJsonLd from "./ArticleJsonLd";
+import NewsPageContent from "./NewsPageContent";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-const SITE_BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://www.thekhmertoday.news";
+const SITE_BASE =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://www.thekhmertoday.news";
 
 type ContentBlock = { subtitle?: string | null; paragraph?: string };
 type EndImage = { url: string; name?: string | null };
@@ -30,11 +31,17 @@ type ArticleMeta = {
   end_images?: EndImage[] | null;
 };
 
-async function fetchArticleById(baseUrl: string, path: string): Promise<ArticleMeta | null> {
+async function fetchArticleById(
+  baseUrl: string,
+  path: string,
+): Promise<ArticleMeta | null> {
   try {
     const response = await fetch(`${baseUrl}${path}`, {
       method: "GET",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
       cache: "no-store",
     });
     if (!response.ok) return null;
@@ -114,7 +121,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id: idParam } = await params;
-  if (!API_BASE_URL) {
+  if (!isApiConfigured()) {
     return {
       title: "The Khmer Today - Latest News, Articles & Videos",
       description:
@@ -122,7 +129,7 @@ export async function generateMetadata({
     };
   }
 
-  const apiBase = API_BASE_URL.replace(/\/$/, "");
+  const apiBase = getApiBaseUrl();
 
   // Support explicit video route: /news/v-123
   const isVideoRoute = idParam.startsWith("v-");
@@ -141,7 +148,10 @@ export async function generateMetadata({
       // Ensure image URL is absolute
       let imageUrl = `${siteBase}/assets/TKDN_Logo/TKTN_Logo_Square.png`; // Default to logo
       if (news.cover) {
-        if (news.cover.startsWith("http://") || news.cover.startsWith("https://")) {
+        if (
+          news.cover.startsWith("http://") ||
+          news.cover.startsWith("https://")
+        ) {
           imageUrl = news.cover;
         } else if (news.cover.startsWith("/")) {
           imageUrl = `${siteBase}${news.cover}`;
@@ -151,7 +161,8 @@ export async function generateMetadata({
       }
 
       const title = `${news.title} - The Khmer Today`;
-      const descriptionFallback = getFirstSentenceFromContent(news.content_blocks) || news.title;
+      const descriptionFallback =
+        getFirstSentenceFromContent(news.content_blocks) || news.title;
       const description = news.subtitle || descriptionFallback;
       const url = `${siteBase}/news/${isVideoRoute ? `v-${numericId}` : numericId}`;
 
@@ -159,12 +170,14 @@ export async function generateMetadata({
       const keywords = [
         news.title,
         news.subtitle || descriptionFallback,
-        news.category?.name || '',
-        'The Khmer Today',
-        'Cambodia news',
-        'Khmer news',
-        'news articles',
-      ].filter(Boolean).join(', ');
+        news.category?.name || "",
+        "The Khmer Today",
+        "Cambodia news",
+        "Khmer news",
+        "news articles",
+      ]
+        .filter(Boolean)
+        .join(", ");
 
       // Use absolute title so root layout template doesn't add " | The Khmer Today" again
       return {
@@ -188,7 +201,8 @@ export async function generateMetadata({
             },
           ],
           publishedTime: news.date_time_post || news.created_at,
-          modifiedTime: news.updated_at || news.date_time_post || news.created_at,
+          modifiedTime:
+            news.updated_at || news.date_time_post || news.created_at,
           authors: [news.author || "The Khmer Today"],
         },
         twitter: {
@@ -224,14 +238,20 @@ export async function generateMetadata({
   };
 }
 
-export default async function NewsPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function NewsPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id: idParam } = await params;
 
   // If the route is numeric (/news/123 or /news/v-123) we SSR the article so Google sees the H1 + body in HTML.
-  if (API_BASE_URL) {
-    const apiBase = API_BASE_URL.replace(/\/$/, "");
+  if (isApiConfigured()) {
+    const apiBase = getApiBaseUrl();
     const isVideoRoute = idParam.startsWith("v-");
-    const numericId = isVideoRoute ? parseInt(idParam.slice(2), 10) : parseInt(idParam, 10);
+    const numericId = isVideoRoute
+      ? parseInt(idParam.slice(2), 10)
+      : parseInt(idParam, 10);
 
     if (!isNaN(numericId)) {
       const news = isVideoRoute
@@ -243,7 +263,10 @@ export default async function NewsPage({ params }: { params: Promise<{ id: strin
       let imageUrl = `${SITE_BASE}/assets/TKDN_Logo/TKTN_Logo_Square.png`;
       if (news.cover) {
         if (news.cover.startsWith("http")) imageUrl = news.cover;
-        else imageUrl = news.cover.startsWith("/") ? `${SITE_BASE}${news.cover}` : `${SITE_BASE}/${news.cover}`;
+        else
+          imageUrl = news.cover.startsWith("/")
+            ? `${SITE_BASE}${news.cover}`
+            : `${SITE_BASE}/${news.cover}`;
       }
 
       const published = news.date_time_post || news.created_at;
@@ -265,20 +288,30 @@ export default async function NewsPage({ params }: { params: Promise<{ id: strin
                 <div className="w-1 min-h-12 rounded-[10px] bg-[#085c9c] self-stretch shrink-0" />
                 <div className="flex flex-col">
                   {news.category?.name && (
-                    <p className="text-base font-bold text-[#1D2229]">{news.category.name}</p>
+                    <p className="text-base font-bold text-[#1D2229]">
+                      {news.category.name}
+                    </p>
                   )}
                   {published && (
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm text-gray-600">{formatDateShort(published)}</span>
+                      <span className="text-sm text-gray-600">
+                        {formatDateShort(published)}
+                      </span>
                       <span className="text-xs text-gray-500"></span>
-                      {(news.user?.username || news.author || "The Khmer Today") && (
+                      {(news.user?.username ||
+                        news.author ||
+                        "The Khmer Today") && (
                         <span className="hidden md:inline text-sm text-gray-600">
-                          {news.user?.username || news.author || "The Khmer Today"}
+                          {news.user?.username ||
+                            news.author ||
+                            "The Khmer Today"}
                         </span>
                       )}
                     </div>
                   )}
-                  {(news.user?.username || news.author || "The Khmer Today") && (
+                  {(news.user?.username ||
+                    news.author ||
+                    "The Khmer Today") && (
                     <span className="text-sm text-gray-600 md:hidden">
                       {news.user?.username || news.author || "The Khmer Today"}
                     </span>
@@ -291,7 +324,9 @@ export default async function NewsPage({ params }: { params: Promise<{ id: strin
                 {news.title}
               </h1>
 
-              {news.subtitle && <p className="text-lg text-gray-700">{news.subtitle}</p>}
+              {news.subtitle && (
+                <p className="text-lg text-gray-700">{news.subtitle}</p>
+              )}
             </header>
 
             {news.cover && (
@@ -305,22 +340,28 @@ export default async function NewsPage({ params }: { params: Promise<{ id: strin
             )}
 
             {/* SSR article body so Google can index it */}
-            {Array.isArray(news.content_blocks) && news.content_blocks.length > 0 && (
-              <div className="space-y-8 wrap-anywhere [&_a]:wrap-anywhere">
-                {news.content_blocks.map((block, idx) => (
-                  <section key={idx} className="space-y-4">
-                    {block.subtitle && (
-                      <h2 className="text-2xl font-bold text-[#1D2229]">{block.subtitle}</h2>
-                    )}
-                    {splitParagraphs(block.paragraph).map((p, pIdx) => (
-                      <p key={pIdx} className="text-base text-gray-800 leading-relaxed wrap-anywhere">
-                        {p}
-                      </p>
-                    ))}
-                  </section>
-                ))}
-              </div>
-            )}
+            {Array.isArray(news.content_blocks) &&
+              news.content_blocks.length > 0 && (
+                <div className="space-y-8 wrap-anywhere [&_a]:wrap-anywhere">
+                  {news.content_blocks.map((block, idx) => (
+                    <section key={idx} className="space-y-4">
+                      {block.subtitle && (
+                        <h2 className="text-2xl font-bold text-[#1D2229]">
+                          {block.subtitle}
+                        </h2>
+                      )}
+                      {splitParagraphs(block.paragraph).map((p, pIdx) => (
+                        <p
+                          key={pIdx}
+                          className="text-base text-gray-800 leading-relaxed wrap-anywhere"
+                        >
+                          {p}
+                        </p>
+                      ))}
+                    </section>
+                  ))}
+                </div>
+              )}
 
             {/* Middle Video/Image (SSR) */}
             {news.middle_video_url ? (
@@ -335,7 +376,9 @@ export default async function NewsPage({ params }: { params: Promise<{ id: strin
                   />
                 </div>
                 {news.middle_video_name && (
-                  <p className="text-sm text-gray-600 mt-2 italic">{news.middle_video_name}</p>
+                  <p className="text-sm text-gray-600 mt-2 italic">
+                    {news.middle_video_name}
+                  </p>
                 )}
               </div>
             ) : news.middle_image_url ? (
