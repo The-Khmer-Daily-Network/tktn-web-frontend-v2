@@ -1,0 +1,34 @@
+# Explicit allow for link-preview crawlers
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Facebot
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: TelegramBot
+Allow: /
+
+# All other bots - allow everything except admin pages
+User-agent: *
+Allow: /
+Disallow: /login
+Disallow: /dashboard
+Disallow: /articleManagement
+Disallow: /categoryManagement
+Disallow: /contentImages
+Disallow: /contentVideos
+Disallow: /covers
+Disallow: /newsroomTeam
+Disallow: /ourPartner
+Disallow: /publishers
+Disallow: /socialMedia
+Disallow: /videoManagement
+Disallow: /advertisement
+Disallow: /web
+Disallow: /test-cover-modal
+
+# Sitemap
+Sitemap: https://www.thekhmertoday.news/sitemap.xml

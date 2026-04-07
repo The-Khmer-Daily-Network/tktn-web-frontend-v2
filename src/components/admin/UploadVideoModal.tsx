@@ -1,0 +1,272 @@
+"use client";
+
+import { useState, useRef } from "react";
+import { X, Upload, Video, Loader2 } from "lucide-react";
+import { uploadContentVideo } from "@/services/contentVideo";
+import type { ContentVideo } from "@/types/contentVideo";
+
+interface UploadVideoModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onUploadSuccess?: (video: ContentVideo) => void; // Callback when upload succeeds
+}
+
+export default function UploadVideoModal({
+  isOpen,
+  onClose,
+  onUploadSuccess,
+}: UploadVideoModalProps) {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [title, setTitle] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  if (!isOpen) return null;
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type (common video formats)
+    const allowedTypes = [
+      "video/mp4",
+      "video/mpeg",
+      "video/quicktime",
+      "video/x-msvideo",
+      "video/webm",
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      setError("Only MP4, MPEG, MOV, AVI, and WebM video files are allowed");
+      setSelectedFile(null);
+      setPreview(null);
+      return;
+    }
+
+    setError(null);
+    setSelectedFile(file);
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      setError("Please select a video file");
+      return;
+    }
+
+    try {
+      setUploading(true);
+      setError(null);
+
+      const response = await uploadContentVideo({
+        video: selectedFile,
+        title: title.trim() || undefined,
+      });
+
+      if (response.success) {
+        // Handle success - response.data can be single or array
+        const uploadedVideo = Array.isArray(response.data)
+          ? response.data[0]
+          : response.data;
+
+        // Call success callback
+        if (onUploadSuccess) {
+          onUploadSuccess(uploadedVideo);
+        }
+
+        // Reset form
+        resetForm();
+        onClose();
+      } else {
+        setError(response.message || "Upload failed");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to upload video");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const resetForm = () => {
+    setSelectedFile(null);
+    setTitle("");
+    setPreview(null);
+    setError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleClose = () => {
+    if (!uploading) {
+      resetForm();
+      onClose();
+    }
+  };
+
+  return (
+    <>
+      {/* Backdrop with blur effect */}
+      <div
+        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-200"
+        onClick={handleClose}
+      />
+
+      {/* Modal */}
+      <div className="fixed inset-0 z-200 flex items-center justify-center p-4">
+        <div
+          className="bg-white rounded-lg shadow-xl w-full max-w-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-900">
+              Upload Content Video
+            </h2>
+            <button
+              onClick={handleClose}
+              disabled={uploading}
+              className="cursor-pointer p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Close"
+            >
+              <X size={24} />
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="p-4 space-y-4 max-h-[60vh] overflow-y-auto">
+            {/* File Upload Area */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Video File <span className="text-red-500">*</span>
+              </label>
+              <div className="mt-1">
+                {preview ? (
+                  <div className="relative">
+                    <video
+                      src={preview}
+                      controls
+                      className="w-full h-48 object-contain rounded-lg border border-gray-200 bg-black"
+                    />
+                    <button
+                      onClick={() => {
+                        setSelectedFile(null);
+                        setPreview(null);
+                        if (fileInputRef.current) {
+                          fileInputRef.current.value = "";
+                        }
+                      }}
+                      className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                      aria-label="Remove video"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors"
+                  >
+                    <Video className="mx-auto h-10 w-10 text-gray-400" />
+                    <div className="mt-3">
+                      <span className="text-blue-600 font-medium">
+                        Click to upload
+                      </span>
+                      <span className="text-gray-500"> or drag and drop</span>
+                    </div>
+                    <p className="mt-1 text-sm text-gray-500">
+                      MP4, MPEG, MOV, AVI, WebM (Max 2MB)
+                    </p>
+                  </div>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="video/mp4,video/mpeg,video/quicktime,video/x-msvideo,video/webm"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                  disabled={uploading}
+                />
+              </div>
+              {selectedFile && (
+                <p className="mt-2 text-sm text-gray-600">
+                  Selected: {selectedFile.name} (
+                  {(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                </p>
+              )}
+            </div>
+
+            {/* Title Input */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Title <span className="text-gray-400 text-xs">(Optional)</span>
+              </label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Leave empty for auto-generated title"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                disabled={uploading}
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                If left empty, the backend will automatically generate a title
+              </p>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
+            )}
+
+            {/* Info */}
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-xs text-blue-800">
+                <strong>Note:</strong> Only one video can be uploaded at a time.
+                The original filename will be automatically detected from the
+                uploaded file.
+              </p>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-200">
+            <button
+              onClick={handleClose}
+              disabled={uploading}
+              className="cursor-pointer px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleUpload}
+              disabled={!selectedFile || uploading}
+              className="cursor-pointer flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            >
+              {uploading ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <Upload size={18} />
+                  Upload
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
