@@ -8,7 +8,9 @@ import {
   X,
   Image as ImageIcon,
   Video as VideoIcon,
+  Link2,
 } from "lucide-react";
+import { normalizeLinkUrl } from "@/utils/inlineFormatting";
 import {
   getAdminVideos,
   createVideo,
@@ -79,6 +81,7 @@ function VideoModal({
   const coverFileInputRef = useRef<HTMLInputElement | null>(null);
   const middleVideoFileInputRef = useRef<HTMLInputElement | null>(null);
   const endImageFileInputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const paragraphTextareaRefs = useRef<Array<HTMLTextAreaElement | null>>([]);
   const MAX_IMAGE_SIZE_BYTES = 2_000_000; // 2.00 MB strict
   const currentUser = getStoredUser();
   const currentUserId = currentUser?.id ?? null;
@@ -327,6 +330,78 @@ function VideoModal({
     const updated = [...contentBlocks];
     updated[index] = { ...updated[index], [field]: value };
     setContentBlocks(updated);
+  };
+
+  const applyParagraphSelectionFormat = (
+    index: number,
+    formatter: (selected: string) => string,
+  ) => {
+    const textarea = paragraphTextareaRefs.current[index];
+    if (!textarea) return;
+
+    const selectionStart = textarea.selectionStart ?? 0;
+    const selectionEnd = textarea.selectionEnd ?? 0;
+    const selectedText = textarea.value.slice(selectionStart, selectionEnd);
+
+    if (!selectedText.trim()) return;
+
+    const replacement = formatter(selectedText);
+    const nextValue =
+      textarea.value.slice(0, selectionStart) +
+      replacement +
+      textarea.value.slice(selectionEnd);
+
+    handleUpdateContentBlock(index, "paragraph", nextValue);
+
+    requestAnimationFrame(() => {
+      const target = paragraphTextareaRefs.current[index];
+      if (!target) return;
+      target.focus();
+      target.setSelectionRange(
+        selectionStart,
+        selectionStart + replacement.length,
+      );
+    });
+  };
+
+  const handleParagraphBoldShortcut = (
+    e: React.KeyboardEvent<HTMLTextAreaElement>,
+    index: number,
+  ) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "b") {
+      e.preventDefault();
+      applyParagraphSelectionFormat(index, (selected) => `**${selected}**`);
+      return;
+    }
+
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "u") {
+      e.preventDefault();
+      handleParagraphLinkInsert(index);
+    }
+  };
+
+  const handleParagraphLinkInsert = (index: number) => {
+    const textarea = paragraphTextareaRefs.current[index];
+    if (!textarea) return;
+
+    const selectionStart = textarea.selectionStart ?? 0;
+    const selectionEnd = textarea.selectionEnd ?? 0;
+    const selectedText = textarea.value.slice(selectionStart, selectionEnd).trim();
+
+    if (!selectedText) {
+      setError("Select text first, then click Link.");
+      return;
+    }
+
+    const looksLikeUrl = /^(https?:\/\/|www\.)/i.test(selectedText);
+    const defaultUrl = looksLikeUrl ? normalizeLinkUrl(selectedText) : "https://";
+    const rawUrl = window.prompt("Enter URL for this link", defaultUrl);
+    if (rawUrl == null) return;
+
+    const href = normalizeLinkUrl(rawUrl);
+    if (!href) return;
+
+    applyParagraphSelectionFormat(index, (selected) => `[${selected}](${href})`);
   };
 
   const handleSelectMiddleVideo = (video: ContentVideo) => {
@@ -736,10 +811,25 @@ function VideoModal({
                             )}
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1">
-                              Content <span className="text-red-500">*</span>
-                            </label>
+                            <div className="mb-1 flex items-center justify-between">
+                              <label className="block text-xs font-medium text-gray-600">
+                                Content <span className="text-red-500">*</span>
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => handleParagraphLinkInsert(index)}
+                                className="cursor-pointer inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white px-2 py-1 text-[11px] font-medium text-gray-700 hover:bg-gray-50"
+                                disabled={loading}
+                                title="Select text and add a link"
+                              >
+                                <Link2 size={12} />
+                                Link
+                              </button>
+                            </div>
                             <textarea
+                              ref={(el) => {
+                                paragraphTextareaRefs.current[index] = el;
+                              }}
                               className="auto-resize w-full min-h-24 resize-none overflow-hidden px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm text-gray-900 placeholder:text-gray-400 bg-white"
                               value={block.paragraph}
                               onChange={(e) =>
@@ -749,11 +839,15 @@ function VideoModal({
                                   e.target.value,
                                 )
                               }
+                              onKeyDown={(e) => handleParagraphBoldShortcut(e, index)}
                               placeholder="Enter the main content for this block..."
                               rows={3}
                               disabled={loading}
                               required
                             />
+                            <p className="mt-1 text-[11px] text-gray-500">
+                              Shortcuts: Cmd+U (Mac) / Ctrl+U (Windows) for link
+                            </p>
                           </div>
                         </div>
                       </div>

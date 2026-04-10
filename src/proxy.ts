@@ -72,7 +72,7 @@ setInterval(() => {
   }
 }, RATE_LIMIT.windowMs);
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   // Security headers
   const response = NextResponse.next();
 
@@ -145,7 +145,7 @@ export function middleware(request: NextRequest) {
   return response;
 }
 
-// Configure which routes the middleware runs on
+// Configure which routes the proxy runs on
 export const config = {
   matcher: [
     /*

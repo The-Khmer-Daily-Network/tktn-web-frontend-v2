@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { cache } from "react";
 import { getApiBaseUrl, isApiConfigured } from "@/lib/api-url";
 import { getFirstSentenceFromContent } from "@/utils/article";
+import { renderInlineFormatting } from "@/utils/inlineFormatting";
 import ArticleJsonLd from "./ArticleJsonLd";
 import NewsPageContent from "./NewsPageContent";
 
@@ -355,7 +356,7 @@ export default async function NewsPage({
                           key={pIdx}
                           className="text-base text-gray-800 leading-relaxed wrap-anywhere"
                         >
-                          {p}
+                          {renderInlineFormatting(p)}
                         </p>
                       ))}
                     </section>
