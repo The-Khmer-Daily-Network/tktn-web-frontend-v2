@@ -411,6 +411,5 @@ export default async function NewsPage({
     }
   }
 
-  // Non-numeric routes (/news/latest, /news/video, /news/national, etc.) remain client-driven.
   return <NewsPageContent />;
 }
