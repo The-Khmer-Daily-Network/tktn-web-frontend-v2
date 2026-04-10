@@ -146,20 +146,8 @@ export async function generateMetadata({
     if (news) {
       const siteBase = SITE_BASE;
 
-      // Ensure image URL is absolute
-      let imageUrl = `${siteBase}/assets/TKDN_Logo/TKTN_Logo_Square.png`; // Default to logo
-      if (news.cover) {
-        if (
-          news.cover.startsWith("http://") ||
-          news.cover.startsWith("https://")
-        ) {
-          imageUrl = news.cover;
-        } else if (news.cover.startsWith("/")) {
-          imageUrl = `${siteBase}${news.cover}`;
-        } else {
-          imageUrl = `${siteBase}/${news.cover}`;
-        }
-      }
+      // Route OG image through same-domain endpoint for crawler compatibility (Telegram-safe).
+      const imageUrl = `${siteBase}/api/news/${idParam}/og-image`;
 
       const title = `${news.title} - The Khmer Today`;
       const descriptionFallback =
