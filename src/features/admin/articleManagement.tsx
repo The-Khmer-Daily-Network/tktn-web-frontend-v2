@@ -495,11 +495,6 @@ function ArticleModal({
       setError("Please select a category");
       return;
     }
-    if (title.length > 100) {
-      setError("Your title is too long. Please use 100 characters or less.");
-      return;
-    }
-
     // Validate content blocks
     const validBlocks = contentBlocks.filter((block) => block.paragraph.trim());
     if (validBlocks.length === 0) {
@@ -602,12 +597,7 @@ function ArticleModal({
                     </h3>
                   </div>
 
-                  <div
-                    className={`relative rounded-lg border bg-white p-4 ${title.length > 100
-                        ? "border-2 border-[#B00020]"
-                        : "border border-gray-300"
-                      }`}
-                  >
+                  <div className="relative rounded-lg border border-gray-300 bg-white p-4">
                     <label className="mb-2 flex items-center gap-1.5 text-xs font-medium text-gray-700">
                       Article Title{" "}
                       <span className="text-gray-500">(required)</span>
@@ -622,17 +612,8 @@ function ArticleModal({
                       disabled={loading}
                       required
                     />
-                    <div className="mt-2 flex justify-end text-[12px]">
-                      <span
-                        className={
-                          title.length > 100
-                            ? "font-medium text-[#B00020]"
-                            : "text-gray-500"
-                        }
-                      >
-                        {title.length}
-                      </span>
-                      <span className="text-gray-500">/100</span>
+                    <div className="mt-2 flex justify-end text-[12px] text-gray-500">
+                      {title.length}
                     </div>
                   </div>
 
@@ -1163,7 +1144,6 @@ function ArticleModal({
                   !title.trim() ||
                   !userId ||
                   !categoryId ||
-                  title.length > 100 ||
                   contentBlocks.some(
                     (b) => (b.subtitle || "").length > 250,
                   )
