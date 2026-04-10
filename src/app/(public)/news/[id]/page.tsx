@@ -347,43 +347,44 @@ export default async function NewsPage({
                           {renderInlineFormatting(p)}
                         </p>
                       ))}
+
+                      {/* Keep middle media between block 1 and block 2 */}
+                      {idx === 0 &&
+                        (news.middle_video_url ? (
+                          <div className="w-full my-8">
+                            <div className="relative w-full aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                              <iframe
+                                src={toYouTubeEmbedUrl(news.middle_video_url) || undefined}
+                                title={news.middle_video_name || news.title}
+                                className="absolute inset-0 w-full h-full"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                              />
+                            </div>
+                            {news.middle_video_name && (
+                              <p className="text-sm text-gray-600 mt-2 italic">
+                                {news.middle_video_name}
+                              </p>
+                            )}
+                          </div>
+                        ) : news.middle_image_url ? (
+                          <figure className="w-full my-8">
+                            <img
+                              src={news.middle_image_url}
+                              alt={news.middle_image_name || news.title}
+                              className="w-full h-auto object-cover rounded-lg"
+                            />
+                            {news.middle_image_name && (
+                              <figcaption className="text-sm text-gray-600 mt-2 italic">
+                                {news.middle_image_name}
+                              </figcaption>
+                            )}
+                          </figure>
+                        ) : null)}
                     </section>
                   ))}
                 </div>
               )}
-
-            {/* Middle Video/Image (SSR) */}
-            {news.middle_video_url ? (
-              <div className="w-full my-8">
-                <div className="relative w-full aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                  <iframe
-                    src={toYouTubeEmbedUrl(news.middle_video_url) || undefined}
-                    title={news.middle_video_name || news.title}
-                    className="absolute inset-0 w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
-                {news.middle_video_name && (
-                  <p className="text-sm text-gray-600 mt-2 italic">
-                    {news.middle_video_name}
-                  </p>
-                )}
-              </div>
-            ) : news.middle_image_url ? (
-              <figure className="w-full my-8">
-                <img
-                  src={news.middle_image_url}
-                  alt={news.middle_image_name || news.title}
-                  className="w-full h-auto object-cover rounded-lg"
-                />
-                {news.middle_image_name && (
-                  <figcaption className="text-sm text-gray-600 mt-2 italic">
-                    {news.middle_image_name}
-                  </figcaption>
-                )}
-              </figure>
-            ) : null}
 
             {/* End Images (restored) */}
             {Array.isArray(news.end_images) && news.end_images.length > 0 && (
