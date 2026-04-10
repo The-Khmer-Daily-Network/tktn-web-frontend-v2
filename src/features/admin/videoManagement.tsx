@@ -371,6 +371,12 @@ function VideoModal({
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "b") {
       e.preventDefault();
       applyParagraphSelectionFormat(index, (selected) => `**${selected}**`);
+      return;
+    }
+
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "u") {
+      e.preventDefault();
+      handleParagraphLinkInsert(index);
     }
   };
 
@@ -839,6 +845,9 @@ function VideoModal({
                               disabled={loading}
                               required
                             />
+                            <p className="mt-1 text-[11px] text-gray-500">
+                              Shortcuts: Cmd+U (Mac) / Ctrl+U (Windows) for link
+                            </p>
                           </div>
                         </div>
                       </div>
