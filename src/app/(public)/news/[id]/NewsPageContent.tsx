@@ -16,6 +16,7 @@ import StructuredData from "@/components/StructuredData";
 import BannerSponsor from "@/features/sponsor/bannerSponsor";
 import { getFontStyle, getFontClassName } from "@/utils/font";
 import { getFirstSentenceFromContent } from "@/utils/article";
+import { renderInlineFormatting, stripInlineFormatting } from "@/utils/inlineFormatting";
 
 export default function NewsPageContent() {
   const params = useParams();
@@ -816,10 +817,10 @@ export default function NewsPageContent() {
                         {paragraphs.map((paragraph, paraIndex) => (
                           <p
                             key={paraIndex}
-                            className={`text-base text-gray-800 leading-relaxed wrap-anywhere ${getFontClassName(paragraph.trim())}`}
-                            style={getFontStyle(paragraph.trim())}
+                            className={`text-base text-gray-800 leading-relaxed wrap-anywhere ${getFontClassName(stripInlineFormatting(paragraph.trim()))}`}
+                            style={getFontStyle(stripInlineFormatting(paragraph.trim()))}
                           >
-                            {paragraph.trim()}
+                            {renderInlineFormatting(paragraph.trim())}
                           </p>
                         ))}
                       </div>
