@@ -28,6 +28,12 @@ function getRateLimitKey(request: NextRequest): string {
 
 function checkRateLimit(ip: string): boolean {
   const now = Date.now();
+  // Lazy cleanup on request path (avoid background timers in runtime).
+  for (const [key, entry] of rateLimitMap.entries()) {
+    if (now > entry.resetTime) {
+      rateLimitMap.delete(key);
+    }
+  }
   const record = rateLimitMap.get(ip);
 
   if (!record || now > record.resetTime) {
@@ -61,16 +67,6 @@ function isKnownSocialCrawler(userAgent: string | null): boolean {
     ua.includes("discordbot")
   );
 }
-
-// Clean up old entries periodically
-setInterval(() => {
-  const now = Date.now();
-  for (const [ip, record] of rateLimitMap.entries()) {
-    if (now > record.resetTime) {
-      rateLimitMap.delete(ip);
-    }
-  }
-}, RATE_LIMIT.windowMs);
 
 export function proxy(request: NextRequest) {
   // Security headers
