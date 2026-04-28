@@ -12,6 +12,8 @@ if (!isApiConfigured()) {
   );
 }
 
+const MAX_IMAGE_SIZE_BYTES = 20 * 1024 * 1024; // 20MB
+
 export interface GetContentCoversOptions {
   page?: number;
   per_page?: number;
@@ -55,7 +57,7 @@ export async function getContentCovers(
     return response.json();
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
-      throw new Error(`Your file is higher than 2MB`);
+      throw new Error(`Your file is higher than 20MB`);
     }
     throw error;
   }
@@ -88,7 +90,7 @@ export async function deleteContentCover(
     return response.json();
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
-      throw new Error(`Your file is higher than 2MB`);
+      throw new Error(`Your file is higher than 20MB`);
     }
     throw error;
   }
@@ -177,6 +179,9 @@ export async function uploadContentCover({
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
     if (!allowedTypes.includes(image.type)) {
       throw new Error("Only JPG, PNG, and JPEG files are allowed");
+    }
+    if (image.size > MAX_IMAGE_SIZE_BYTES) {
+      throw new Error("File size must be less than or equal to 20MB");
     }
 
     // Create FormData

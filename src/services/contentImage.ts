@@ -13,6 +13,8 @@ if (!isApiConfigured()) {
   );
 }
 
+const MAX_IMAGE_SIZE_BYTES = 20 * 1024 * 1024; // 20MB
+
 export interface GetContentImagesOptions {
   page?: number;
   per_page?: number;
@@ -56,7 +58,7 @@ export async function getContentImages(
     return response.json();
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
-      throw new Error(`Your file is higher than 2MB`);
+      throw new Error(`Your file is higher than 20MB`);
     }
     throw error;
   }
@@ -89,7 +91,7 @@ export async function deleteContentImage(
     return response.json();
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
-      throw new Error(`Your file is higher than 2MB`);
+      throw new Error(`Your file is higher than 20MB`);
     }
     throw error;
   }
@@ -114,6 +116,9 @@ export async function uploadContentImage({
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
     if (!allowedTypes.includes(image.type)) {
       throw new Error("Only JPG, PNG, and JPEG files are allowed");
+    }
+    if (image.size > MAX_IMAGE_SIZE_BYTES) {
+      throw new Error("File size must be less than or equal to 20MB");
     }
 
     // Create FormData
@@ -286,7 +291,7 @@ export async function uploadMultipleContentImages({
 
     // Validate all files
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
-    const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+    const maxSize = MAX_IMAGE_SIZE_BYTES;
 
     for (const image of images) {
       if (!allowedTypes.includes(image.type)) {
@@ -295,7 +300,7 @@ export async function uploadMultipleContentImages({
         );
       }
       if (image.size > maxSize) {
-        throw new Error(`${image.name}: File size must be less than 2MB`);
+        throw new Error(`${image.name}: File size must be less than or equal to 20MB`);
       }
     }
 
@@ -330,7 +335,7 @@ export async function uploadMultipleContentImages({
     return response.json();
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
-      throw new Error(`Your file is higher than 2MB`);
+      throw new Error(`Your file is higher than 20MB`);
     }
     throw error;
   }
