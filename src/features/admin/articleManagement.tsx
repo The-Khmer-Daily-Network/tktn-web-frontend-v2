@@ -70,7 +70,7 @@ function ArticleModal({
   const middleImageFileInputRef = useRef<HTMLInputElement | null>(null);
   const endImageFileInputRefs = useRef<Array<HTMLInputElement | null>>([]);
   const paragraphTextareaRefs = useRef<Array<HTMLTextAreaElement | null>>([]);
-  const MAX_IMAGE_SIZE_BYTES = 2_000_000; // 2.00 MB strict
+  const MAX_IMAGE_SIZE_BYTES = 20 * 1024 * 1024; // 20MB
   const currentUser = getStoredUser();
   const currentUserId = currentUser?.id ?? null;
   const currentUsername = currentUser?.username ?? "Unknown user";
@@ -158,7 +158,7 @@ function ArticleModal({
     const file = event.target.files?.[0];
     if (!file) return;
     if (file.size > MAX_IMAGE_SIZE_BYTES) {
-      setError("Cover image must be 2MB or smaller.");
+      setError("Cover image must be 20MB or smaller.");
       if (event.target) {
         event.target.value = "";
       }
@@ -203,7 +203,7 @@ function ArticleModal({
     const file = event.target.files?.[0];
     if (!file) return;
     if (file.size > MAX_IMAGE_SIZE_BYTES) {
-      setError("Middle image must be 2MB or smaller.");
+      setError("Middle image must be 20MB or smaller.");
       if (event.target) {
         event.target.value = "";
       }
@@ -407,7 +407,7 @@ function ArticleModal({
     const file = event.target.files?.[0];
     if (!file) return;
     if (file.size > MAX_IMAGE_SIZE_BYTES) {
-      setError("End image must be 2MB or smaller.");
+      setError("End image must be 20MB or smaller.");
       if (event.target) {
         event.target.value = "";
       }
