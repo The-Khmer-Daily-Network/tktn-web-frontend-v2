@@ -18,6 +18,7 @@ import type { ArticleContentBlock, ArticleEndImage } from "@/types/article";
 import type { Category } from "@/types/category";
 import ImageSelectorModal from "@/components/admin/ImageSelectorModal";
 import type { ContentImage } from "@/types/contentImage";
+import { revalidateArticleAfterSave } from "@/services/articleRevalidate";
 
 interface ArticleModalProps {
   isOpen: boolean;
@@ -528,8 +529,13 @@ function ArticleModal({
 
       if (articleProp) {
         await updateArticle(articleProp.id, params);
+        await revalidateArticleAfterSave(articleProp.id);
       } else {
-        await createArticle(params);
+        const created = await createArticle(params);
+        const savedId = created.data?.id;
+        if (savedId) {
+          await revalidateArticleAfterSave(savedId);
+        }
       }
 
       // Once saved, keep the uploaded cover in content covers

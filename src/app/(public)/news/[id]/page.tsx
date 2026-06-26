@@ -4,12 +4,16 @@ import type { ReactNode } from "react";
 import { cache } from "react";
 import { getApiBaseUrl, isApiConfigured } from "@/lib/api-url";
 import { getFirstSentenceFromContent } from "@/utils/article";
+import { articlePageFetchInit } from "@/utils/articlePageCache";
 import { renderInlineFormatting } from "@/utils/inlineFormatting";
 import ArticleJsonLd from "./ArticleJsonLd";
 import NewsPageContent from "./NewsPageContent";
 
 const SITE_BASE =
   process.env.NEXT_PUBLIC_SITE_URL || "https://www.thekhmertoday.news";
+
+/** ISR at CDN; cleared on admin save via revalidatePath. */
+export const revalidate = 300;
 
 type ContentBlock = { subtitle?: string | null; paragraph?: string };
 type EndImage = { url: string; name?: string | null };
@@ -43,7 +47,7 @@ async function fetchArticleById(
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-      cache: "no-store",
+      ...articlePageFetchInit(),
     });
     if (!response.ok) return null;
     const data = await response.json();
