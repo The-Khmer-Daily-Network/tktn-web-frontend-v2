@@ -1,8 +1,12 @@
 import type { MetadataRoute } from "next";
 import { getApiBaseUrl, isApiConfigured } from "@/lib/api-url";
 import { categoryNameToSlug } from "@/utils/slug";
+import {
+  cachedFetchInit,
+  SITEMAP_REVALIDATE_SECONDS,
+} from "@/utils/articlePageCache";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://www.thekhmertoday.news";
@@ -32,7 +36,7 @@ async function getAllNews() {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        next: { revalidate: 300 },
+        ...cachedFetchInit(SITEMAP_REVALIDATE_SECONDS),
       });
 
       if (!response.ok) {
@@ -83,7 +87,7 @@ async function getAllVideos() {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        next: { revalidate: 300 },
+        ...cachedFetchInit(SITEMAP_REVALIDATE_SECONDS),
       });
 
       if (!response.ok) {
@@ -124,7 +128,7 @@ async function getCategories() {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-      next: { revalidate: 3600 },
+      ...cachedFetchInit(SITEMAP_REVALIDATE_SECONDS),
     });
 
     if (!response.ok) {

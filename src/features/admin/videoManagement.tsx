@@ -22,6 +22,7 @@ import { getStoredUser } from "@/services/auth";
 import { uploadContentCover, deleteContentCover } from "@/services/contentCover";
 import { uploadContentVideo, deleteContentVideo } from "@/services/contentVideo";
 import { uploadContentImage, deleteContentImage } from "@/services/contentImage";
+import { revalidateVideoAfterSave } from "@/services/articleRevalidate";
 import type { Video } from "@/types/video";
 import type { VideoContentBlock, VideoEndImage } from "@/types/video";
 import type { Category } from "@/types/category";
@@ -544,8 +545,13 @@ function VideoModal({
 
       if (videoProp) {
         await updateVideo(videoProp.id, params);
+        await revalidateVideoAfterSave(videoProp.id);
       } else {
-        await createVideo(params);
+        const created = await createVideo(params);
+        const savedId = created.data?.id;
+        if (savedId) {
+          await revalidateVideoAfterSave(savedId);
+        }
       }
 
       // Once saved, keep the uploaded cover in content covers
