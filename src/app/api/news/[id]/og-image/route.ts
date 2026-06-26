@@ -58,24 +58,12 @@ export async function GET(
   const { id } = await params;
   const imageUrl = await fetchNewsCover(id);
 
-  try {
-    const imageResponse = await fetch(imageUrl, {
-      ...cachedFetchInit(3600),
-    });
-    if (!imageResponse.ok) {
-      return Response.redirect(DEFAULT_IMAGE, 302);
-    }
-
-    const bytes = await imageResponse.arrayBuffer();
-    const contentType = imageResponse.headers.get("content-type") || "image/jpeg";
-
-    return new Response(bytes, {
-      headers: {
-        "Content-Type": contentType,
-        "Cache-Control": ogImageCacheControl(),
-      },
-    });
-  } catch {
-    return Response.redirect(DEFAULT_IMAGE, 302);
-  }
+  // Redirect to the real image URL — avoids proxying bytes through Vercel (saves origin transfer).
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: imageUrl,
+      "Cache-Control": ogImageCacheControl(),
+    },
+  });
 }
