@@ -1,4 +1,4 @@
-import { getApiUrl, isApiConfigured } from "@/lib/api-url";
+import { getApiUrl, isApiConfigured, readApiJson } from "@/lib/api-url";
 import { getAdminActorHeaders, getAdminHeaders } from "@/services/auth";
 import type {
   ContentImage,
@@ -55,7 +55,7 @@ export async function getContentImages(
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(`Your file is higher than 20MB`);
@@ -88,7 +88,7 @@ export async function deleteContentImage(
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(`Your file is higher than 20MB`);
@@ -147,7 +147,7 @@ export async function uploadContentImage({
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
@@ -204,7 +204,7 @@ export async function uploadContentImageByUrl({
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
@@ -263,7 +263,7 @@ export async function uploadMultipleContentImagesByUrl({
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
@@ -332,7 +332,7 @@ export async function uploadMultipleContentImages({
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(`Your file is higher than 20MB`);

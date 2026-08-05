@@ -1,4 +1,4 @@
-import { getApiUrl } from "@/lib/api-url";
+import { getApiUrl, readApiJson } from "@/lib/api-url";
 import type { ActivityLogsResponse } from "@/types/activityLog";
 
 /**
@@ -26,5 +26,5 @@ export async function getActivityLogs(options?: {
     throw new Error(`Failed to fetch activity logs: ${response.statusText}`);
   }
 
-  return response.json();
+  return readApiJson(response);
 }

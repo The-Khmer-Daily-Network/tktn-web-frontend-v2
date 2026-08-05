@@ -1,4 +1,4 @@
-import { getApiUrl, isApiConfigured } from "@/lib/api-url";
+import { getApiUrl, isApiConfigured, readApiJson } from "@/lib/api-url";
 import { getAdminHeaders } from "@/services/auth";
 import type {
   Video,
@@ -109,7 +109,7 @@ export async function getVideos(
     );
   }
 
-  return response.json();
+  return readApiJson(response);
 }
 
 export async function getVideoById(id: number): Promise<VideoByIdResponse> {
@@ -129,7 +129,7 @@ export async function getVideoById(id: number): Promise<VideoByIdResponse> {
       `Failed to fetch video: ${response.status} ${response.statusText}. ${errorText}`,
     );
   }
-  return response.json();
+  return readApiJson(response);
 }
 
 const ADMIN_VIDEOS_BASE = "/admin/videos";
@@ -168,7 +168,7 @@ export async function createVideo(
     );
   }
 
-  return response.json();
+  return readApiJson(response);
 }
 
 /**
@@ -194,7 +194,7 @@ export async function updateVideo(
     );
   }
 
-  return response.json();
+  return readApiJson(response);
 }
 
 /**
@@ -216,5 +216,5 @@ export async function deleteVideo(id: number): Promise<VideoDeleteResponse> {
     );
   }
 
-  return response.json();
+  return readApiJson(response);
 }

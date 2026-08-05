@@ -1,4 +1,4 @@
-import { getApiUrl, isApiConfigured } from "@/lib/api-url";
+import { getApiUrl, isApiConfigured, readApiJson } from "@/lib/api-url";
 import { getAdminHeaders } from "@/services/auth";
 import type {
   Article,
@@ -117,7 +117,7 @@ export async function getArticles(
     );
   }
 
-  return response.json();
+  return readApiJson(response);
 }
 
 /**
@@ -141,7 +141,7 @@ export async function getArticleById(id: number): Promise<ArticleByIdResponse> {
       `Failed to fetch article: ${response.status} ${response.statusText}. ${errorText}`,
     );
   }
-  return response.json();
+  return readApiJson(response);
 }
 
 const ADMIN_ARTICLES_BASE = "/admin/articles";
@@ -180,7 +180,7 @@ export async function createArticle(
     );
   }
 
-  return response.json();
+  return readApiJson(response);
 }
 
 /**
@@ -206,7 +206,7 @@ export async function updateArticle(
     );
   }
 
-  return response.json();
+  return readApiJson(response);
 }
 
 /**
@@ -230,5 +230,5 @@ export async function deleteArticle(
     );
   }
 
-  return response.json();
+  return readApiJson(response);
 }

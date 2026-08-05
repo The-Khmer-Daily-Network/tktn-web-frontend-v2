@@ -39,6 +39,8 @@ export function getApiBaseUrl(): string {
   return base;
 }
 
+export { readApiJson } from "./read-api-json";
+
 export function getApiUrl(path: string): string {
   const baseUrl = getApiBaseUrl();
   const apiPath = path.startsWith("/") ? path : `/${path}`;

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { cache } from "react";
-import { getApiBaseUrl, isApiConfigured } from "@/lib/api-url";
+import { getApiBaseUrl, isApiConfigured, readApiJson } from "@/lib/api-url";
 import { getFirstSentenceFromContent } from "@/utils/article";
 import { articlePageFetchInit } from "@/utils/articlePageCache";
 import { renderInlineFormatting } from "@/utils/inlineFormatting";
@@ -50,7 +50,7 @@ async function fetchArticleById(
       ...articlePageFetchInit(),
     });
     if (!response.ok) return null;
-    const data = await response.json();
+    const data = await readApiJson(response);
     return data.success ? data.data : null;
   } catch {
     return null;

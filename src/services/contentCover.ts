@@ -1,4 +1,4 @@
-import { getApiUrl, isApiConfigured } from "@/lib/api-url";
+import { getApiUrl, isApiConfigured, readApiJson } from "@/lib/api-url";
 import { getAdminActorHeaders, getAdminHeaders } from "@/services/auth";
 import type {
   ContentCover,
@@ -54,7 +54,7 @@ export async function getContentCovers(
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(`Your file is higher than 20MB`);
@@ -87,7 +87,7 @@ export async function deleteContentCover(
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(`Your file is higher than 20MB`);
@@ -157,7 +157,7 @@ export async function uploadContentCoverByUrl({
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
@@ -210,7 +210,7 @@ export async function uploadContentCover({
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(

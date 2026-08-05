@@ -1,4 +1,4 @@
-import { getApiUrl, isApiConfigured } from "@/lib/api-url";
+import { getApiUrl, isApiConfigured, readApiJson } from "@/lib/api-url";
 import { getAdminActorHeaders, getAdminHeaders } from "@/services/auth";
 import type {
   ContentVideo,
@@ -112,7 +112,7 @@ export async function deleteContentVideo(
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(`Your file is higher than 2MB`);
@@ -176,7 +176,7 @@ export async function uploadContentVideo({
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
@@ -233,7 +233,7 @@ export async function uploadContentVideoByUrl({
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
