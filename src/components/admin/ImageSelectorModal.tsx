@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import { Plus, ChevronLeft, ChevronRight, X, Check } from "lucide-react";
 import { getContentImages } from "@/services/contentImage";
 import type {
@@ -165,12 +164,12 @@ export default function ImageSelectorModal({
                     onClick={() => handleImageClick(image)}
                   >
                     <div className="relative aspect-square bg-gray-100 shrink-0">
-                      <Image
+                      {/* Native img: admin library URLs vary by bucket/CDN */}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
                         src={image.image_url}
                         alt={image.title}
-                        fill
-                        className="object-cover"
-                        sizes="20vw"
+                        className="absolute inset-0 h-full w-full object-cover"
                         loading="lazy"
                       />
                       {/* Select Button - Top Right */}

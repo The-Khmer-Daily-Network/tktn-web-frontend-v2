@@ -2,7 +2,7 @@ import type { InternationalNewsItem } from "@/features/userFeature/international
 import type { NationalNewsItem } from "@/features/userFeature/nationalNews";
 import type { ArticleDashboardItem } from "@/features/userFeature/newsDashboard";
 import type { VideoNewsItem } from "@/features/userFeature/videoNews";
-import { getApiUrl } from "@/lib/api-url";
+import { getApiUrl, readApiJson } from "@/lib/api-url";
 
 export interface HomePageData {
   dashboard: ArticleDashboardItem[];
@@ -41,5 +41,5 @@ export async function getHomePageData(): Promise<HomePageResponse> {
     );
   }
 
-  return response.json();
+  return readApiJson<HomePageResponse>(response);
 }

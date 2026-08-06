@@ -1,4 +1,4 @@
-import { getApiUrl, isApiConfigured } from "@/lib/api-url";
+import { getApiUrl, isApiConfigured, readApiJson } from "@/lib/api-url";
 import type {
   PartnerLogoImageDeleteResponse,
   PartnerLogoImageResponse,
@@ -37,7 +37,7 @@ export async function getPartnerLogos(): Promise<PartnerLogoImageResponse> {
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
@@ -100,7 +100,7 @@ export async function uploadPartnerLogo(
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
@@ -138,7 +138,7 @@ export async function deletePartnerLogo(
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(

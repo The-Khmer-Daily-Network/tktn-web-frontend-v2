@@ -1,4 +1,4 @@
-import { getApiUrl, isApiConfigured } from "@/lib/api-url";
+import { getApiUrl, isApiConfigured, readApiJson } from "@/lib/api-url";
 import type {
   CategoryCreateParams,
   CategoryCreateResponse,
@@ -54,7 +54,7 @@ export async function getCategories(): Promise<CategoryResponse> {
         );
       }
 
-      const data: CategoryResponse = await response.json();
+      const data = await readApiJson<CategoryResponse>(response);
       categoriesCache = { data, at: Date.now() };
       return data;
     } catch (error) {
@@ -100,7 +100,7 @@ export async function createCategory(
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
@@ -139,7 +139,7 @@ export async function updateCategory(
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
@@ -177,7 +177,7 @@ export async function deleteCategory(
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(

@@ -1,4 +1,4 @@
-import { getApiUrl, isApiConfigured } from "@/lib/api-url";
+import { getApiUrl, isApiConfigured, readApiJson } from "@/lib/api-url";
 import { getAdminActorHeaders, getAdminHeaders } from "@/services/auth";
 import type {
   ContentVideo,
@@ -6,6 +6,26 @@ import type {
   ContentVideoResponse,
   UploadContentVideoResponse,
 } from "@/types/contentVideo";
+import { resolveMediaUrl } from "@/utils/resolveMediaUrl";
+
+function normalizeContentVideo(video: ContentVideo): ContentVideo {
+  return {
+    ...video,
+    video_url: resolveMediaUrl(video.video_url),
+  };
+}
+
+function normalizeUploadVideoResponse(
+  payload: UploadContentVideoResponse,
+): UploadContentVideoResponse {
+  const data = payload.data;
+  return {
+    ...payload,
+    data: Array.isArray(data)
+      ? data.map(normalizeContentVideo)
+      : normalizeContentVideo(data),
+  };
+}
 
 if (!isApiConfigured()) {
   console.warn(
@@ -54,29 +74,12 @@ export async function getContentVideos(
 
     // Get raw response text first to check for escaped slashes
     const responseText = await response.text();
-    console.log("Raw response text:", responseText.substring(0, 500)); // Log first 500 chars
 
     // Parse JSON
-    const data = JSON.parse(responseText);
+    const data = JSON.parse(responseText) as ContentVideoResponse;
 
-    // Fix escaped forward slashes in video URLs (in case they exist)
     if (data.success && Array.isArray(data.data)) {
-      data.data = data.data.map((video: ContentVideo) => {
-        // Check if URL contains escaped slashes (as string characters, not JSON escapes)
-        let cleanUrl = video.video_url;
-        if (typeof cleanUrl === "string") {
-          // Replace any backslash followed by forward slash
-          cleanUrl = cleanUrl.replace(/\\\//g, "/");
-          // Also handle double backslashes
-          cleanUrl = cleanUrl.replace(/\\\\/g, "\\");
-        }
-        console.log("Original URL:", video.video_url);
-        console.log("Cleaned URL:", cleanUrl);
-        return {
-          ...video,
-          video_url: cleanUrl,
-        };
-      });
+      data.data = data.data.map(normalizeContentVideo);
     }
 
     return data;
@@ -112,7 +115,7 @@ export async function deleteContentVideo(
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(`Your file is higher than 2MB`);
@@ -176,7 +179,8 @@ export async function uploadContentVideo({
       );
     }
 
-    return response.json();
+    const payload = await readApiJson<UploadContentVideoResponse>(response);
+    return normalizeUploadVideoResponse(payload);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
@@ -233,7 +237,8 @@ export async function uploadContentVideoByUrl({
       );
     }
 
-    return response.json();
+    const payload = await readApiJson<UploadContentVideoResponse>(response);
+    return normalizeUploadVideoResponse(payload);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(

@@ -1,4 +1,4 @@
-import { getApiUrl, isApiConfigured } from "@/lib/api-url";
+import { getApiUrl, isApiConfigured, readApiJson } from "@/lib/api-url";
 import type {
   NewsroomTeamCreateParams,
   NewsroomTeamCreateResponse,
@@ -41,7 +41,7 @@ export async function getNewsroomTeam(): Promise<NewsroomTeamResponse> {
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
@@ -79,7 +79,7 @@ export async function createNewsroomTeam(
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
@@ -118,7 +118,7 @@ export async function updateNewsroomTeam(
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
@@ -156,7 +156,7 @@ export async function deleteNewsroomTeam(
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
@@ -192,7 +192,7 @@ export async function getNewsroomTeamImages(): Promise<NewsroomTeamImageResponse
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
@@ -255,7 +255,7 @@ export async function uploadNewsroomTeamImage(
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(

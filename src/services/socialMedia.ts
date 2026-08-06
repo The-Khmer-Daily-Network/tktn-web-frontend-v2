@@ -1,4 +1,4 @@
-import { getApiUrl, isApiConfigured } from "@/lib/api-url";
+import { getApiUrl, isApiConfigured, readApiJson } from "@/lib/api-url";
 import type { SocialMediaResponse } from "@/types/socialMedia";
 
 if (!isApiConfigured()) {
@@ -31,7 +31,7 @@ export async function getSocialMedia(): Promise<SocialMediaResponse> {
       );
     }
 
-    const data = await response.json();
+    const data = await readApiJson(response);
     return data;
   } catch (error) {
     console.error("Error fetching social media:", error);

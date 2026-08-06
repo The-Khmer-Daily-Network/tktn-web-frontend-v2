@@ -1,4 +1,4 @@
-import { getApiUrl, isApiConfigured } from "@/lib/api-url";
+import { getApiUrl, isApiConfigured, readApiJson } from "@/lib/api-url";
 import type {
   AdvertisementCreateParams,
   AdvertisementCreateResponse,
@@ -47,7 +47,7 @@ export async function getAdvertisementImages(): Promise<AdvertisementImageRespon
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
@@ -107,7 +107,7 @@ export async function uploadAdvertisementImage(
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
@@ -145,7 +145,7 @@ export async function deleteAdvertisementImage(
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
@@ -185,7 +185,7 @@ export async function getAdvertisements(): Promise<AdvertisementResponse> {
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
@@ -223,7 +223,7 @@ export async function createAdvertisement(
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
@@ -262,7 +262,7 @@ export async function updateAdvertisement(
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
@@ -300,7 +300,7 @@ export async function deleteAdvertisement(
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(

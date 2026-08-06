@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { cache } from "react";
-import { getApiBaseUrl, isApiConfigured } from "@/lib/api-url";
+import { getApiBaseUrl, isApiConfigured, readApiJson } from "@/lib/api-url";
 import { getFirstSentenceFromContent } from "@/utils/article";
 import { articlePageFetchInit } from "@/utils/articlePageCache";
 import { renderInlineFormatting } from "@/utils/inlineFormatting";
+import { parseContentLines } from "@/utils/richTextFormat";
 import ArticleJsonLd from "./ArticleJsonLd";
 import NewsPageContent from "./NewsPageContent";
 
@@ -34,6 +35,7 @@ type ArticleMeta = {
   middle_video_name?: string | null;
   content_blocks?: ContentBlock[] | null;
   end_images?: EndImage[] | null;
+  tags?: string[] | null;
 };
 
 async function fetchArticleById(
@@ -50,7 +52,7 @@ async function fetchArticleById(
       ...articlePageFetchInit(),
     });
     if (!response.ok) return null;
-    const data = await response.json();
+    const data = await readApiJson(response);
     return data.success ? data.data : null;
   } catch {
     return null;
@@ -75,13 +77,6 @@ function formatDateShort(dateString?: string) {
     minute: "2-digit",
     hour12: true,
   }).format(date);
-}
-
-function splitParagraphs(paragraph?: string) {
-  return (paragraph || "")
-    .split(/\n/)
-    .map((p) => p.trim())
-    .filter(Boolean);
 }
 
 function normalizeVideoUrl(url?: string | null) {
@@ -164,6 +159,7 @@ export async function generateMetadata({
         news.title,
         news.subtitle || descriptionFallback,
         news.category?.name || "",
+        ...(Array.isArray(news.tags) ? news.tags : []),
         "The Khmer Today",
         "Cambodia news",
         "Khmer news",
@@ -317,6 +313,19 @@ export default async function NewsPage({
                 {news.title}
               </h1>
 
+              {Array.isArray(news.tags) && news.tags.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2">
+                  {news.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center rounded-md border border-[#085C9C]/25 bg-[#085C9C]/10 px-2.5 py-1 text-xs font-semibold tracking-wide text-[#085C9C]"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+
               {news.subtitle && (
                 <p className="text-lg text-gray-700">{news.subtitle}</p>
               )}
@@ -343,14 +352,43 @@ export default async function NewsPage({
                           {block.subtitle}
                         </h2>
                       )}
-                      {splitParagraphs(block.paragraph).map((p, pIdx) => (
-                        <p
-                          key={pIdx}
-                          className="text-base text-gray-800 leading-relaxed wrap-anywhere"
-                        >
-                          {renderInlineFormatting(p)}
-                        </p>
-                      ))}
+                      {parseContentLines(block.paragraph).map((line, pIdx) => {
+                        if (line.type === "heading") {
+                          const HeadingTag = `h${line.level}` as "h1" | "h2" | "h3";
+                          const headingClass =
+                            line.level === 1
+                              ? "text-3xl font-bold text-[#1D2229]"
+                              : line.level === 2
+                                ? "text-2xl font-bold text-[#1D2229]"
+                                : "text-xl font-semibold text-[#1D2229]";
+                          return (
+                            <HeadingTag
+                              key={pIdx}
+                              className={`${headingClass} wrap-anywhere`}
+                            >
+                              {renderInlineFormatting(line.text)}
+                            </HeadingTag>
+                          );
+                        }
+                        if (line.type === "quote") {
+                          return (
+                            <blockquote
+                              key={pIdx}
+                              className="border-l-4 border-gray-300 pl-4 italic text-gray-600 wrap-anywhere"
+                            >
+                              {renderInlineFormatting(line.text)}
+                            </blockquote>
+                          );
+                        }
+                        return (
+                          <p
+                            key={pIdx}
+                            className="text-base text-gray-800 leading-relaxed wrap-anywhere"
+                          >
+                            {renderInlineFormatting(line.text)}
+                          </p>
+                        );
+                      })}
 
                       {/* Keep middle media between block 1 and block 2 */}
                       {idx === 0 &&

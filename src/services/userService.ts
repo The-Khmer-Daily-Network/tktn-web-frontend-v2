@@ -1,4 +1,4 @@
-import { getApiUrl } from "@/lib/api-url";
+import { getApiUrl, readApiJson } from "@/lib/api-url";
 import { getAdminHeaders, getStoredUser } from "@/services/auth";
 import type {
   CreateUserPayload,
@@ -19,7 +19,7 @@ export async function listUsers(): Promise<User[]> {
   });
   if (!response.ok)
     throw new Error(`Failed to list users: ${response.statusText}`);
-  const data: UserResponse = await response.json();
+  const data: UserResponse = await readApiJson(response);
   return data.success && Array.isArray(data.data) ? data.data : [];
 }
 
@@ -36,7 +36,7 @@ export async function createUser(
     mode: "cors",
     body: JSON.stringify(payload),
   });
-  const data = await response.json().catch(() => ({}));
+  const data = await readApiJson(response).catch(() => ({}));
   if (!response.ok) {
     throw new Error(
       data?.message || `Failed to create user: ${response.statusText}`,
@@ -57,7 +57,7 @@ export async function deleteUser(
     credentials: "omit",
     mode: "cors",
   });
-  const data = await response.json().catch(() => ({}));
+  const data = await readApiJson(response).catch(() => ({}));
   if (!response.ok) {
     throw new Error(
       data?.message || `Failed to delete user: ${response.statusText}`,
@@ -80,7 +80,7 @@ export async function createRemovalRequest(
     mode: "cors",
     body: JSON.stringify({ target_user_id: targetUserId }),
   });
-  const data = await response.json().catch(() => ({}));
+  const data = await readApiJson(response).catch(() => ({}));
   if (!response.ok) {
     throw new Error(
       data?.message || `Failed to request removal: ${response.statusText}`,
@@ -103,7 +103,7 @@ export async function getMyRemovalRequests(): Promise<RemovalRequest[]> {
     mode: "cors",
   });
   if (!response.ok) return [];
-  const data = await response.json().catch(() => ({}));
+  const data = await readApiJson(response).catch(() => ({}));
   const list = data?.data ?? data?.removal_requests ?? [];
   return Array.isArray(list)
     ? list.filter((r: RemovalRequest) => r.status === "pending")
@@ -128,7 +128,7 @@ export async function acceptRemovalRequest(
       mode: "cors",
     },
   );
-  const data = await response.json().catch(() => ({}));
+  const data = await readApiJson(response).catch(() => ({}));
   if (!response.ok) {
     throw new Error(
       data?.message || `Failed to accept: ${response.statusText}`,
@@ -155,7 +155,7 @@ export async function declineRemovalRequest(
       mode: "cors",
     },
   );
-  const data = await response.json().catch(() => ({}));
+  const data = await readApiJson(response).catch(() => ({}));
   if (!response.ok) {
     throw new Error(
       data?.message || `Failed to decline: ${response.statusText}`,
@@ -182,7 +182,7 @@ export async function changeMyPassword(
     mode: "cors",
     body: JSON.stringify(payload),
   });
-  const data = await response.json().catch(() => ({}));
+  const data = await readApiJson(response).catch(() => ({}));
   if (!response.ok) {
     throw new Error(
       data?.message || `Failed to change password: ${response.statusText}`,

@@ -1,4 +1,4 @@
-import { getApiBaseUrl, isApiConfigured } from "@/lib/api-url";
+import { getApiBaseUrl, isApiConfigured, readApiJson } from "@/lib/api-url";
 import { cachedFetchInit, ogImageCacheControl } from "@/utils/articlePageCache";
 
 const SITE_BASE =
@@ -39,7 +39,7 @@ async function fetchNewsCover(idParam: string): Promise<string> {
     });
     if (!response.ok) return DEFAULT_IMAGE;
 
-    const payload = (await response.json()) as {
+    const payload = (await readApiJson(response)) as {
       success?: boolean;
       data?: NewsMeta;
     };

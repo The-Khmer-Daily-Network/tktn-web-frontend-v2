@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getApiBaseUrl, isApiConfigured } from "@/lib/api-url";
+import { getApiBaseUrl, isApiConfigured, readApiJson } from "@/lib/api-url";
 import { categoryNameToSlug } from "@/utils/slug";
 import {
   cachedFetchInit,
@@ -43,7 +43,7 @@ async function getAllNews() {
         break;
       }
 
-      const data = await response.json();
+      const data = await readApiJson(response);
       if (!data?.success || !Array.isArray(data.data)) {
         break;
       }
@@ -94,7 +94,7 @@ async function getAllVideos() {
         break;
       }
 
-      const data = await response.json();
+      const data = await readApiJson(response);
       if (!data?.success || !Array.isArray(data.data)) {
         break;
       }
@@ -135,7 +135,7 @@ async function getCategories() {
       return [];
     }
 
-    const data = await response.json();
+    const data = await readApiJson(response);
     return data.categories || [];
   } catch (error) {
     console.error("Error fetching categories for sitemap:", error);

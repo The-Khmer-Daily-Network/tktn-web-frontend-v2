@@ -1,4 +1,4 @@
-import { getApiUrl, isApiConfigured } from "@/lib/api-url";
+import { getApiUrl, isApiConfigured, readApiJson } from "@/lib/api-url";
 import { getAdminActorHeaders, getAdminHeaders } from "@/services/auth";
 import type {
   ContentImage,
@@ -6,6 +6,33 @@ import type {
   ContentImageResponse,
   UploadContentImageResponse,
 } from "@/types/contentImage";
+import { resolveMediaUrl } from "@/utils/resolveMediaUrl";
+
+function normalizeContentImage(image: ContentImage): ContentImage {
+  return {
+    ...image,
+    image_url: resolveMediaUrl(image.image_url),
+  };
+}
+
+function normalizeContentImagePayload(
+  data: ContentImage | ContentImage[],
+): ContentImage | ContentImage[] {
+  return Array.isArray(data)
+    ? data.map(normalizeContentImage)
+    : normalizeContentImage(data);
+}
+
+function normalizeUploadResponse(
+  payload: UploadContentImageResponse,
+): UploadContentImageResponse {
+  return {
+    ...payload,
+    data: normalizeContentImagePayload(payload.data) as
+      | ContentImage
+      | ContentImage[],
+  };
+}
 
 if (!isApiConfigured()) {
   console.warn(
@@ -55,7 +82,11 @@ export async function getContentImages(
       );
     }
 
-    return response.json();
+    const payload = await readApiJson<ContentImageResponse>(response);
+    return {
+      ...payload,
+      data: payload.data.map(normalizeContentImage),
+    };
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(`Your file is higher than 20MB`);
@@ -88,7 +119,7 @@ export async function deleteContentImage(
       );
     }
 
-    return response.json();
+    return readApiJson(response);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(`Your file is higher than 20MB`);
@@ -147,7 +178,8 @@ export async function uploadContentImage({
       );
     }
 
-    return response.json();
+    const payload = await readApiJson<UploadContentImageResponse>(response);
+    return normalizeUploadResponse(payload);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
@@ -204,7 +236,8 @@ export async function uploadContentImageByUrl({
       );
     }
 
-    return response.json();
+    const payload = await readApiJson<UploadContentImageResponse>(response);
+    return normalizeUploadResponse(payload);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
@@ -263,7 +296,8 @@ export async function uploadMultipleContentImagesByUrl({
       );
     }
 
-    return response.json();
+    const payload = await readApiJson<UploadContentImageResponse>(response);
+    return normalizeUploadResponse(payload);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
@@ -332,7 +366,8 @@ export async function uploadMultipleContentImages({
       );
     }
 
-    return response.json();
+    const payload = await readApiJson<UploadContentImageResponse>(response);
+    return normalizeUploadResponse(payload);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(`Your file is higher than 20MB`);

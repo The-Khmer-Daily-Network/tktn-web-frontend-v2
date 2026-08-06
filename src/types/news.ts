@@ -34,6 +34,7 @@ export interface News {
   middle_video_url: string | null;
   middle_video_name: string | null;
   end_images: EndImage[];
+  tags?: string[] | null;
   created_at: string;
   updated_at: string;
   category: Category | null;

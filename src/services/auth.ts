@@ -1,4 +1,4 @@
-import { getApiUrl, isApiConfigured } from "@/lib/api-url";
+import { getApiUrl, isApiConfigured, readApiJson } from "@/lib/api-url";
 import type { LoginCredentials, User, UserResponse } from "@/types/auth";
 
 if (!isApiConfigured()) {
@@ -33,7 +33,7 @@ export async function getCurrentUser(
       );
     }
 
-    const data: UserResponse = await response.json();
+    const data: UserResponse = await readApiJson(response);
 
     if (!data.success || !data.data || data.data.length === 0) {
       return null;
