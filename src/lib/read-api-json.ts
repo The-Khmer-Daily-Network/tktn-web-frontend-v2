@@ -2,7 +2,7 @@
  * Parse JSON from an API response body.
  * Local PHP 8.5 dev servers may prepend deprecation HTML before the JSON payload.
  */
-export async function readApiJson<T = unknown>(response: Response): Promise<T> {
+export async function readApiJson<T = any>(response: Response): Promise<T> {
   const text = await response.text();
   const trimmed = text.trimStart();
 

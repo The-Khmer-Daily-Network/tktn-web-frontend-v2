@@ -31,8 +31,7 @@ export async function getSocialMedia(): Promise<SocialMediaResponse> {
       );
     }
 
-    const data = await readApiJson(response);
-    return data;
+    return readApiJson<SocialMediaResponse>(response);
   } catch (error) {
     console.error("Error fetching social media:", error);
     throw error;

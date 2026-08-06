@@ -52,7 +52,9 @@ async function fetchArticleById(
       ...articlePageFetchInit(),
     });
     if (!response.ok) return null;
-    const data = await readApiJson(response);
+    const data = await readApiJson<{ success: boolean; data: ArticleMeta }>(
+      response,
+    );
     return data.success ? data.data : null;
   } catch {
     return null;
