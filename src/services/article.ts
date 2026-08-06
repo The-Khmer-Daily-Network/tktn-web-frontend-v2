@@ -26,6 +26,7 @@ export interface ArticleCreateParams {
   middle_image_url?: string | null;
   middle_image_name?: string | null;
   end_images?: ArticleEndImage[];
+  tags?: string[];
 }
 
 /** Params for updating an article (admin PUT /admin/articles/{id}). */
@@ -42,6 +43,7 @@ export interface ArticleUpdateParams {
   middle_image_url?: string | null;
   middle_image_name?: string | null;
   end_images?: ArticleEndImage[];
+  tags?: string[];
 }
 
 export interface ArticleCreateResponse {

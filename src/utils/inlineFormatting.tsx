@@ -3,9 +3,10 @@ import type { ReactNode } from "react";
 type ParsedToken =
   | { type: "text"; value: string }
   | { type: "bold"; value: string }
+  | { type: "italic"; value: string }
   | { type: "link"; text: string; href: string };
 
-const INLINE_PATTERN = /\*\*(.+?)\*\*|\[([^\]]+)\]\(([^)]+)\)/g;
+const INLINE_PATTERN = /\*\*(.+?)\*\*|\*(.+?)\*|\[([^\]]+)\]\(([^)]+)\)/g;
 
 export function normalizeLinkUrl(url: string): string {
   const trimmed = url.trim();
@@ -17,6 +18,7 @@ export function normalizeLinkUrl(url: string): string {
 export function stripInlineFormatting(text: string): string {
   return text
     .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/\*(.+?)\*/g, "$1")
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1");
 }
 
@@ -26,7 +28,7 @@ function tokenizeInlineFormatting(text: string): ParsedToken[] {
   let match: RegExpExecArray | null;
 
   while ((match = INLINE_PATTERN.exec(text)) !== null) {
-    const [fullMatch, boldText, linkText, linkUrl] = match;
+    const [fullMatch, boldText, italicText, linkText, linkUrl] = match;
     const start = match.index;
 
     if (start > lastIndex) {
@@ -35,6 +37,8 @@ function tokenizeInlineFormatting(text: string): ParsedToken[] {
 
     if (boldText) {
       tokens.push({ type: "bold", value: boldText });
+    } else if (italicText) {
+      tokens.push({ type: "italic", value: italicText });
     } else if (linkText && linkUrl) {
       tokens.push({
         type: "link",
@@ -62,6 +66,10 @@ export function renderInlineFormatting(
   return tokenizeInlineFormatting(text).map((token, index) => {
     if (token.type === "bold") {
       return <strong key={`b-${index}`}>{token.value}</strong>;
+    }
+
+    if (token.type === "italic") {
+      return <em key={`i-${index}`}>{token.value}</em>;
     }
 
     if (token.type === "link") {

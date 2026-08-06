@@ -17,6 +17,7 @@ import BannerSponsor from "@/features/sponsor/bannerSponsor";
 import { getFontStyle, getFontClassName } from "@/utils/font";
 import { getFirstSentenceFromContent } from "@/utils/article";
 import { renderInlineFormatting, stripInlineFormatting } from "@/utils/inlineFormatting";
+import { parseContentLines } from "@/utils/richTextFormat";
 
 export default function NewsPageContent() {
   const params = useParams();
@@ -629,7 +630,15 @@ export default function NewsPageContent() {
       // When no subtitle, use first sentence of body so meta description isn't just the title
       const descriptionFallback = getFirstSentenceFromContent(singleNews.content_blocks) || singleNews.title;
       const desc = singleNews.subtitle || descriptionFallback;
-      const keywords = [singleNews.title, desc, singleNews.category?.name, "news", "articles", "The Khmer Today"]
+      const keywords = [
+        singleNews.title,
+        desc,
+        singleNews.category?.name,
+        ...(Array.isArray(singleNews.tags) ? singleNews.tags : []),
+        "news",
+        "articles",
+        "The Khmer Today",
+      ]
         .filter(Boolean)
         .join(", ");
       const imageAbsolute = singleNews.cover
@@ -753,6 +762,19 @@ export default function NewsPageContent() {
             {singleNews.title}
           </h1>
 
+          {Array.isArray(singleNews.tags) && singleNews.tags.length > 0 && (
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              {singleNews.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="inline-flex items-center rounded-md border border-[#085C9C]/25 bg-[#085C9C]/10 px-2.5 py-1 text-xs font-semibold tracking-wide text-[#085C9C]"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
           {/* Subtitle */}
           {singleNews.subtitle && (
             <p
@@ -794,15 +816,11 @@ export default function NewsPageContent() {
             singleNews.content_blocks.length > 0 && (
               <div className="prose prose-lg max-w-none mt-6 space-y-6 wrap-anywhere [&_a]:wrap-anywhere">
                 {singleNews.content_blocks.map((block, index) => {
-                  // Split paragraph by single line breaks (\n) to create separate paragraphs with spacing
-                  // This treats each line break as a paragraph break
-                  const paragraphs = block.paragraph
-                    .split(/\n/)
-                    .filter((p) => p.trim());
+                  const lines = parseContentLines(block.paragraph);
 
                   return (
                     <div key={index} className="space-y-6">
-                      {/* Block Subtitle (if exists) */}
+                      {/* Legacy block subtitle (read-only; no longer editable in admin) */}
                       {block.subtitle && (
                         <h2
                           className={`text-2xl font-bold text-[#1D2229] mt-8 mb-6 ${getFontClassName(block.subtitle)}`}
@@ -812,17 +830,55 @@ export default function NewsPageContent() {
                         </h2>
                       )}
 
-                      {/* Block Paragraphs - Split by line breaks, each creates a new paragraph with spacing */}
                       <div className="space-y-4">
-                        {paragraphs.map((paragraph, paraIndex) => (
-                          <p
-                            key={paraIndex}
-                            className={`text-base text-gray-800 leading-relaxed wrap-anywhere ${getFontClassName(stripInlineFormatting(paragraph.trim()))}`}
-                            style={getFontStyle(stripInlineFormatting(paragraph.trim()))}
-                          >
-                            {renderInlineFormatting(paragraph.trim())}
-                          </p>
-                        ))}
+                        {lines.map((line, paraIndex) => {
+                          if (line.type === "heading") {
+                            const HeadingTag = `h${line.level}` as
+                              | "h1"
+                              | "h2"
+                              | "h3";
+                            const headingClass =
+                              line.level === 1
+                                ? "text-3xl font-bold text-[#1D2229]"
+                                : line.level === 2
+                                  ? "text-2xl font-bold text-[#1D2229]"
+                                  : "text-xl font-semibold text-[#1D2229]";
+                            const plain = stripInlineFormatting(line.text);
+                            return (
+                              <HeadingTag
+                                key={paraIndex}
+                                className={`${headingClass} wrap-anywhere ${getFontClassName(plain)}`}
+                                style={getFontStyle(plain)}
+                              >
+                                {renderInlineFormatting(line.text)}
+                              </HeadingTag>
+                            );
+                          }
+
+                          if (line.type === "quote") {
+                            const plain = stripInlineFormatting(line.text);
+                            return (
+                              <blockquote
+                                key={paraIndex}
+                                className={`border-l-4 border-gray-300 pl-4 italic text-gray-600 wrap-anywhere ${getFontClassName(plain)}`}
+                                style={getFontStyle(plain)}
+                              >
+                                {renderInlineFormatting(line.text)}
+                              </blockquote>
+                            );
+                          }
+
+                          const plain = stripInlineFormatting(line.text);
+                          return (
+                            <p
+                              key={paraIndex}
+                              className={`text-base text-gray-800 leading-relaxed wrap-anywhere ${getFontClassName(plain)}`}
+                              style={getFontStyle(plain)}
+                            >
+                              {renderInlineFormatting(line.text)}
+                            </p>
+                          );
+                        })}
                       </div>
 
                       {/* Insert Middle Media after first paragraph */}

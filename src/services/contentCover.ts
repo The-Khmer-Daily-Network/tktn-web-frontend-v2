@@ -5,6 +5,28 @@ import type {
   ContentCoverDeleteResponse,
   ContentCoverResponse,
 } from "@/types/contentCover";
+import { resolveMediaUrl } from "@/utils/resolveMediaUrl";
+
+function normalizeContentCover(cover: ContentCover): ContentCover {
+  return {
+    ...cover,
+    image_url: resolveMediaUrl(cover.image_url),
+  };
+}
+
+function normalizeCoverUploadResponse(payload: {
+  success: boolean;
+  message: string;
+  data: ContentCover | ContentCover[];
+  warnings?: string[];
+}) {
+  return {
+    ...payload,
+    data: Array.isArray(payload.data)
+      ? payload.data.map(normalizeContentCover)
+      : normalizeContentCover(payload.data),
+  };
+}
 
 if (!isApiConfigured()) {
   console.warn(
@@ -54,7 +76,11 @@ export async function getContentCovers(
       );
     }
 
-    return readApiJson(response);
+    const payload = await readApiJson<ContentCoverResponse>(response);
+    return {
+      ...payload,
+      data: payload.data.map(normalizeContentCover),
+    };
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(`Your file is higher than 20MB`);
@@ -157,7 +183,13 @@ export async function uploadContentCoverByUrl({
       );
     }
 
-    return readApiJson(response);
+    const payload = await readApiJson<{
+      success: boolean;
+      message: string;
+      data: ContentCover | ContentCover[];
+      warnings?: string[];
+    }>(response);
+    return normalizeCoverUploadResponse(payload);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
@@ -210,7 +242,13 @@ export async function uploadContentCover({
       );
     }
 
-    return readApiJson(response);
+    const payload = await readApiJson<{
+      success: boolean;
+      message: string;
+      data: ContentCover | ContentCover[];
+      warnings?: string[];
+    }>(response);
+    return normalizeCoverUploadResponse(payload);
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(

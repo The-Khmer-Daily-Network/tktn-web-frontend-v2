@@ -46,7 +46,7 @@ const nextConfig: NextConfig = {
           {
             key: "Content-Security-Policy",
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.thekhmerdailynetwork.com http://api.thekhmertoday.news https://api.thekhmertoday.news http://127.0.0.1:8000 http://localhost:8000 https://www.google-analytics.com https://www.googletagmanager.com; media-src 'self' https://tkdn-development-v1.sgp1.digitaloceanspaces.com https://the-khmer-today.sgp1.digitaloceanspaces.com; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com;",
+              "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://api.thekhmerdailynetwork.com http://api.thekhmertoday.news https://api.thekhmertoday.news http://127.0.0.1:8000 http://localhost:8000 https://www.google-analytics.com https://www.googletagmanager.com; media-src 'self' blob: https://tkdn-development-v1.sgp1.digitaloceanspaces.com https://the-khmer-today.sgp1.digitaloceanspaces.com; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com;",
           },
           {
             key: "X-Content-Type-Options",

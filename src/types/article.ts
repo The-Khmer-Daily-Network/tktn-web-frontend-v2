@@ -31,6 +31,7 @@ export interface Article {
   middle_image_url: string | null;
   middle_image_name: string | null;
   end_images: ArticleEndImage[];
+  tags?: string[] | null;
   created_at: string;
   updated_at: string;
   category: ArticleCategory | null;

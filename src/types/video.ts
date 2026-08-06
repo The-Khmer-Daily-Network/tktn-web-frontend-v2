@@ -33,6 +33,7 @@ export interface Video {
   middle_video_url: string | null;
   middle_video_name: string | null;
   end_images: VideoEndImage[];
+  tags?: string[] | null;
   created_at: string;
   updated_at: string;
   category: VideoCategory | null;

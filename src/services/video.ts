@@ -23,6 +23,7 @@ export interface VideoCreateParams {
   middle_video_url?: string | null;
   middle_video_name?: string | null;
   end_images?: VideoEndImage[];
+  tags?: string[];
 }
 
 export interface VideoUpdateParams {
@@ -40,6 +41,7 @@ export interface VideoUpdateParams {
   middle_video_url?: string | null;
   middle_video_name?: string | null;
   end_images?: VideoEndImage[];
+  tags?: string[];
 }
 
 export interface VideoCreateResponse {

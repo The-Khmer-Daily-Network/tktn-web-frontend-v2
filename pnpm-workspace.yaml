@@ -1,2 +1,9 @@
 allowBuilds:
   sharp: true
+
+overrides:
+  "prosemirror-model": "1.25.11"
+  "prosemirror-view": "1.42.2"
+  "prosemirror-state": "1.4.4"
+  "prosemirror-transform": "1.12.0"
+  "prosemirror-changeset": "2.4.1"
