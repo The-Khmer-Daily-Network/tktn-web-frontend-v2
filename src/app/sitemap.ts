@@ -11,6 +11,16 @@ export const revalidate = 3600;
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://www.thekhmertoday.news";
 
+type PaginatedApiResponse = {
+  success?: boolean;
+  data?: unknown[];
+  meta?: { last_page?: number };
+};
+
+type CategoriesApiResponse = {
+  categories?: unknown[];
+};
+
 /**
  * Fetch all published articles for the sitemap.
  * Uses /articles with pagination and cache: 'no-store' so new content appears quickly.
@@ -43,7 +53,7 @@ async function getAllNews() {
         break;
       }
 
-      const data = await readApiJson(response);
+      const data = await readApiJson<PaginatedApiResponse>(response);
       if (!data?.success || !Array.isArray(data.data)) {
         break;
       }
@@ -94,7 +104,7 @@ async function getAllVideos() {
         break;
       }
 
-      const data = await readApiJson(response);
+      const data = await readApiJson<PaginatedApiResponse>(response);
       if (!data?.success || !Array.isArray(data.data)) {
         break;
       }
@@ -135,7 +145,7 @@ async function getCategories() {
       return [];
     }
 
-    const data = await readApiJson(response);
+    const data = await readApiJson<CategoriesApiResponse>(response);
     return data.categories || [];
   } catch (error) {
     console.error("Error fetching categories for sitemap:", error);
