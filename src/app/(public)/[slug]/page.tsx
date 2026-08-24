@@ -17,6 +17,7 @@ import SEO from "@/components/SEO";
 import BannerSponsor from "@/features/sponsor/bannerSponsor";
 import RevealItem from "@/components/RevealItem";
 import { getFontStyle, getFontClassName } from "@/utils/font";
+import { renderInlineExcerpt, stripInlineFormatting } from "@/utils/inlineFormatting";
 
 /** Unified latest result: article or video, sorted by date (latest first). */
 type LatestResult = (Article | Video) & { date_time_post: string };
@@ -696,10 +697,10 @@ export default function CategoryPage() {
                         {item.content_blocks &&
                           item.content_blocks.length > 0 && (
                             <p
-                              className={`text-sm text-gray-700 line-clamp-3 ${getFontClassName(item.content_blocks[0].paragraph)}`}
-                              style={getFontStyle(item.content_blocks[0].paragraph)}
+                              className={`text-sm text-gray-700 line-clamp-3 ${getFontClassName(stripInlineFormatting(item.content_blocks[0].paragraph))}`}
+                              style={getFontStyle(stripInlineFormatting(item.content_blocks[0].paragraph))}
                             >
-                              {item.content_blocks[0].paragraph}
+                              {renderInlineExcerpt(item.content_blocks[0].paragraph)}
                             </p>
                           )}
                       </div>
@@ -814,10 +815,10 @@ export default function CategoryPage() {
                           {item.content_blocks &&
                             item.content_blocks.length > 0 && (
                               <p
-                                className={`text-sm text-gray-700 line-clamp-3 ${getFontClassName(item.content_blocks[0].paragraph)}`}
-                                style={getFontStyle(item.content_blocks[0].paragraph)}
+                                className={`text-sm text-gray-700 line-clamp-3 ${getFontClassName(stripInlineFormatting(item.content_blocks[0].paragraph))}`}
+                                style={getFontStyle(stripInlineFormatting(item.content_blocks[0].paragraph))}
                               >
-                                {item.content_blocks[0].paragraph}
+                                {renderInlineExcerpt(item.content_blocks[0].paragraph)}
                               </p>
                             )}
                         </div>
@@ -972,10 +973,10 @@ export default function CategoryPage() {
                     {article.content_blocks &&
                       article.content_blocks.length > 0 && (
                         <p 
-                          className={`text-sm text-gray-700 line-clamp-3 ${getFontClassName(article.content_blocks[0].paragraph)}`}
-                          style={getFontStyle(article.content_blocks[0].paragraph)}
+                          className={`text-sm text-gray-700 line-clamp-3 ${getFontClassName(stripInlineFormatting(article.content_blocks[0].paragraph))}`}
+                          style={getFontStyle(stripInlineFormatting(article.content_blocks[0].paragraph))}
                         >
-                          {article.content_blocks[0].paragraph}
+                          {renderInlineExcerpt(article.content_blocks[0].paragraph)}
                         </p>
                       )}
                   </div>

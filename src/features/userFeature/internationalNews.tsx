@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { getFontStyle, getFontClassName } from "@/utils/font";
+import { renderInlineExcerpt, stripInlineFormatting } from "@/utils/inlineFormatting";
 
 // --- Types ---
 export interface ContentBlock {
@@ -251,11 +252,11 @@ export default function InternationalNews({ initialData, loading: loadingProp }:
                       {getExcerpt(item) && (
                         <p
                           className={`mt-3 text-[15px] leading-[1.45] text-gray-600 line-clamp-3 ${getFontClassName(
-                            getExcerpt(item)!,
+                            stripInlineFormatting(getExcerpt(item)!),
                           )}`}
-                          style={getFontStyle(getExcerpt(item)!)}
+                          style={getFontStyle(stripInlineFormatting(getExcerpt(item)!))}
                         >
-                          {getExcerpt(item)}
+                          {renderInlineExcerpt(getExcerpt(item)!)}
                         </p>
                       )}
                       <p className="mt-3 text-[12px] text-gray-500">

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { getFontStyle, getFontClassName } from "@/utils/font";
+import { renderInlineExcerpt, stripInlineFormatting } from "@/utils/inlineFormatting";
 // ANIMATION: uncomment to re-enable per-item reveal
 import RevealItem from "@/components/RevealItem";
 
@@ -220,10 +221,10 @@ export default function NewsDashboard({ initialData, loading: loadingProp }: New
 
                   {mainArticle.first_paragraph && (
                     <p
-                      className={`mt-2 text-[14px] leading-[1.4] text-white/85 line-clamp-2 ${getFontClassName(mainArticle.first_paragraph)}`}
-                      style={getFontStyle(mainArticle.first_paragraph)}
+                      className={`mt-2 text-[14px] leading-[1.4] text-white/85 line-clamp-2 ${getFontClassName(stripInlineFormatting(mainArticle.first_paragraph))}`}
+                      style={getFontStyle(stripInlineFormatting(mainArticle.first_paragraph))}
                     >
-                      {mainArticle.first_paragraph}
+                      {renderInlineExcerpt(mainArticle.first_paragraph)}
                     </p>
                   )}
 
@@ -275,10 +276,10 @@ export default function NewsDashboard({ initialData, loading: loadingProp }: New
                 </div>
                 {mainArticle.first_paragraph && (
                   <p
-                    className={`text-sm text-gray-700 line-clamp-3 ${getFontClassName(mainArticle.first_paragraph)}`}
-                    style={getFontStyle(mainArticle.first_paragraph)}
+                    className={`text-sm text-gray-700 line-clamp-3 ${getFontClassName(stripInlineFormatting(mainArticle.first_paragraph))}`}
+                    style={getFontStyle(stripInlineFormatting(mainArticle.first_paragraph))}
                   >
-                    {mainArticle.first_paragraph}
+                    {renderInlineExcerpt(mainArticle.first_paragraph)}
                   </p>
                 )}
               </div>

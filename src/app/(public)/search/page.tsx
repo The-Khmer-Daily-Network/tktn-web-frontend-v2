@@ -10,6 +10,7 @@ import type { Video } from "@/types/video";
 import { Play } from "lucide-react";
 import SEO from "@/components/SEO";
 import RevealItem from "@/components/RevealItem";
+import { renderInlineExcerpt } from "@/utils/inlineFormatting";
 
 /** Unified search result: article or video, sorted by date (latest first). */
 export type SearchResult = (Article | Video) & { date_time_post: string };
@@ -334,7 +335,7 @@ function SearchContent() {
                       {item.content_blocks &&
                         item.content_blocks.length > 0 && (
                           <p className="text-sm text-gray-700 line-clamp-3">
-                            {item.content_blocks[0].paragraph}
+                            {renderInlineExcerpt(item.content_blocks[0].paragraph)}
                           </p>
                         )}
                     </div>
