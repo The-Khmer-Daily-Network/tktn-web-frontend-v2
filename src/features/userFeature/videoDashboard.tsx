@@ -6,6 +6,7 @@ import { getVideos } from "@/services/video";
 import type { Video } from "@/types/video";
 import { Play } from "lucide-react";
 import { getFontStyle, getFontClassName } from "@/utils/font";
+import { renderInlineExcerpt, stripInlineFormatting } from "@/utils/inlineFormatting";
 import RevealItem from "@/components/RevealItem";
 
 export default function VideoDashboard() {
@@ -373,10 +374,10 @@ export default function VideoDashboard() {
                                         {mainVideo.content_blocks &&
                                             mainVideo.content_blocks.length > 0 && (
                                                 <p 
-                                                    className={`text-sm text-gray-600 line-clamp-2 ${getFontClassName(mainVideo.content_blocks[0].paragraph)}`}
-                                                    style={getFontStyle(mainVideo.content_blocks[0].paragraph)}
+                                                    className={`text-sm text-gray-600 line-clamp-2 ${getFontClassName(stripInlineFormatting(mainVideo.content_blocks[0].paragraph))}`}
+                                                    style={getFontStyle(stripInlineFormatting(mainVideo.content_blocks[0].paragraph))}
                                                 >
-                                                    {mainVideo.content_blocks[0].paragraph}
+                                                    {renderInlineExcerpt(mainVideo.content_blocks[0].paragraph)}
                                                 </p>
                                             )}
                                     </div>

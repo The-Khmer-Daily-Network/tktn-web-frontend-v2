@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Play } from "lucide-react";
 import { getFontStyle, getFontClassName } from "@/utils/font";
+import { renderInlineExcerpt, stripInlineFormatting } from "@/utils/inlineFormatting";
 // ANIMATION: uncomment to re-enable per-item reveal
 import RevealItem from "@/components/RevealItem";
 
@@ -192,10 +193,10 @@ export default function VideoNews({ initialData, loading: loadingProp }: VideoNe
                   video.content_blocks.length > 0 &&
                   video.content_blocks[0].paragraph && (
                     <p
-                      className={`text-sm text-gray-600 line-clamp-2 ${getFontClassName(video.content_blocks[0].paragraph)}`}
-                      style={getFontStyle(video.content_blocks[0].paragraph)}
+                      className={`text-sm text-gray-600 line-clamp-2 ${getFontClassName(stripInlineFormatting(video.content_blocks[0].paragraph))}`}
+                      style={getFontStyle(stripInlineFormatting(video.content_blocks[0].paragraph))}
                     >
-                      {video.content_blocks[0].paragraph}
+                      {renderInlineExcerpt(video.content_blocks[0].paragraph)}
                     </p>
                   )}
               </div>

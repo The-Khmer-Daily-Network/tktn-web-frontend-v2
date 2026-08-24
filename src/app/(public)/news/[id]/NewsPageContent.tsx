@@ -16,7 +16,7 @@ import StructuredData from "@/components/StructuredData";
 import BannerSponsor from "@/features/sponsor/bannerSponsor";
 import { getFontStyle, getFontClassName } from "@/utils/font";
 import { getFirstSentenceFromContent } from "@/utils/article";
-import { renderInlineFormatting, stripInlineFormatting } from "@/utils/inlineFormatting";
+import { renderInlineExcerpt, renderInlineFormatting, stripInlineFormatting } from "@/utils/inlineFormatting";
 import { parseContentLines } from "@/utils/richTextFormat";
 
 export default function NewsPageContent() {
@@ -1211,10 +1211,10 @@ export default function NewsPageContent() {
                     {article.content_blocks &&
                       article.content_blocks.length > 0 && (
                         <p
-                          className={`text-sm max-[481px]:text-xs text-gray-600 line-clamp-2 mt-1 ${getFontClassName(article.content_blocks[0].paragraph)}`}
-                          style={getFontStyle(article.content_blocks[0].paragraph)}
+                          className={`text-sm max-[481px]:text-xs text-gray-600 line-clamp-2 mt-1 ${getFontClassName(stripInlineFormatting(article.content_blocks[0].paragraph))}`}
+                          style={getFontStyle(stripInlineFormatting(article.content_blocks[0].paragraph))}
                         >
-                          {article.content_blocks[0].paragraph}
+                          {renderInlineExcerpt(article.content_blocks[0].paragraph)}
                         </p>
                       )}
                   </div>
@@ -1285,10 +1285,10 @@ export default function NewsPageContent() {
                     {article.content_blocks &&
                       article.content_blocks.length > 0 && (
                         <p
-                          className={`text-sm text-gray-700 line-clamp-3 ${getFontClassName(article.content_blocks[0].paragraph)}`}
-                          style={getFontStyle(article.content_blocks[0].paragraph)}
+                          className={`text-sm text-gray-700 line-clamp-3 ${getFontClassName(stripInlineFormatting(article.content_blocks[0].paragraph))}`}
+                          style={getFontStyle(stripInlineFormatting(article.content_blocks[0].paragraph))}
                         >
-                          {article.content_blocks[0].paragraph}
+                          {renderInlineExcerpt(article.content_blocks[0].paragraph)}
                         </p>
                       )}
                   </div>

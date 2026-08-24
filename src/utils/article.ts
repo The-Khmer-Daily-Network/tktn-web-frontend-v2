@@ -1,3 +1,5 @@
+import { stripInlineFormatting } from "@/utils/inlineFormatting";
+
 /**
  * Get the first sentence (or first ~160 chars) from article content_blocks for use as meta description when subtitle is null.
  */
@@ -14,7 +16,9 @@ export function getFirstSentenceFromContent(
       .split(/\n/)
       .map((line) => line.trim())
       .find(Boolean) || text;
-  text = firstLine.replace(/^#{1,3}\s+/, "").replace(/^>\s?/, "").trim();
+  text = stripInlineFormatting(
+    firstLine.replace(/^#{1,3}\s+/, "").replace(/^>\s?/, "").trim(),
+  );
   if (!text) return null;
   // First sentence: up to first . ! ? or else first 160 chars (meta description length)
   const match = text.match(/^[^.!?]*[.!?]?/);

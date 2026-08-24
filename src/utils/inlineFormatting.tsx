@@ -6,7 +6,13 @@ type ParsedToken =
   | { type: "italic"; value: string }
   | { type: "link"; text: string; href: string };
 
-const INLINE_PATTERN = /\*\*(.+?)\*\*|\*(.+?)\*|\[([^\]]+)\]\(([^)]+)\)/g;
+type RenderInlineOptions = {
+  linkClassName?: string;
+  disableLinks?: boolean;
+};
+
+const INLINE_PATTERN_SOURCE =
+  "\\*\\*(.+?)\\*\\*|\\*(.+?)\\*|\\[([^\\]]+)\\]\\(([^)]+)\\)";
 
 export function normalizeLinkUrl(url: string): string {
   const trimmed = url.trim();
@@ -24,12 +30,12 @@ export function stripInlineFormatting(text: string): string {
 
 function tokenizeInlineFormatting(text: string): ParsedToken[] {
   const tokens: ParsedToken[] = [];
+  const pattern = new RegExp(INLINE_PATTERN_SOURCE, "g");
   let lastIndex = 0;
-  let match: RegExpExecArray | null;
 
-  while ((match = INLINE_PATTERN.exec(text)) !== null) {
+  for (const match of text.matchAll(pattern)) {
     const [fullMatch, boldText, italicText, linkText, linkUrl] = match;
-    const start = match.index;
+    const start = match.index ?? 0;
 
     if (start > lastIndex) {
       tokens.push({ type: "text", value: text.slice(lastIndex, start) });
@@ -59,33 +65,61 @@ function tokenizeInlineFormatting(text: string): ParsedToken[] {
   return tokens;
 }
 
-export function renderInlineFormatting(
+function renderTokens(
   text: string,
-  linkClassName = "text-blue-700 underline hover:text-blue-800",
+  options: Required<Pick<RenderInlineOptions, "linkClassName" | "disableLinks">>,
+  keyPrefix: string,
 ): ReactNode[] {
   return tokenizeInlineFormatting(text).map((token, index) => {
+    const key = `${keyPrefix}-${index}`;
+
     if (token.type === "bold") {
-      return <strong key={`b-${index}`}>{token.value}</strong>;
+      return <strong key={key}>{renderTokens(token.value, options, key)}</strong>;
     }
 
     if (token.type === "italic") {
-      return <em key={`i-${index}`}>{token.value}</em>;
+      return <em key={key}>{renderTokens(token.value, options, key)}</em>;
     }
 
     if (token.type === "link") {
+      const children = renderTokens(token.text, options, key);
+      if (options.disableLinks) {
+        return <span key={key}>{children}</span>;
+      }
       return (
         <a
-          key={`l-${index}`}
+          key={key}
           href={token.href}
           target="_blank"
           rel="noopener noreferrer"
-          className={linkClassName}
+          className={options.linkClassName}
         >
-          {token.text}
+          {children}
         </a>
       );
     }
 
-    return <span key={`t-${index}`}>{token.value}</span>;
+    return <span key={key}>{token.value}</span>;
   });
+}
+
+export function renderInlineFormatting(
+  text: string,
+  options: RenderInlineOptions = {},
+): ReactNode[] {
+  return renderTokens(
+    text,
+    {
+      linkClassName:
+        options.linkClassName ??
+        "text-blue-700 underline hover:text-blue-800",
+      disableLinks: options.disableLinks ?? false,
+    },
+    "t",
+  );
+}
+
+/** Bold/italic for card excerpts without nested <a> inside parent <Link>s. */
+export function renderInlineExcerpt(text: string): ReactNode[] {
+  return renderInlineFormatting(text, { disableLinks: true });
 }
