@@ -1,11 +1,14 @@
 import { getApiBaseUrl, isApiConfigured, readApiJson } from "@/lib/api-url";
-import { cachedFetchInit, ogImageCacheControl } from "@/utils/articlePageCache";
+import {
+  articlePageFetchInit,
+  ogImageCacheControl,
+} from "@/utils/articlePageCache";
 
 const SITE_BASE =
   process.env.NEXT_PUBLIC_SITE_URL || "https://www.thekhmertoday.news";
 const DEFAULT_IMAGE = `${SITE_BASE}/assets/TKDN_Logo/TKTN_Logo_Square.png`;
 
-export const revalidate = 3600;
+export const revalidate = 300;
 
 type NewsMeta = {
   cover?: string | null;
@@ -35,7 +38,7 @@ async function fetchNewsCover(idParam: string): Promise<string> {
       headers: {
         Accept: "application/json",
       },
-      ...cachedFetchInit(3600),
+      ...articlePageFetchInit(),
     });
     if (!response.ok) return DEFAULT_IMAGE;
 

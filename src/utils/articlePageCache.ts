@@ -16,5 +16,5 @@ export function articlePageFetchInit(): RequestInit {
 }
 
 export function ogImageCacheControl(): string {
-  return "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800";
+  return "public, max-age=60, s-maxage=300, stale-while-revalidate=600";
 }

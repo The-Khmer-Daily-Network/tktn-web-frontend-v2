@@ -5,6 +5,7 @@ import { cache } from "react";
 import { getApiBaseUrl, isApiConfigured, readApiJson } from "@/lib/api-url";
 import { getFirstSentenceFromContent } from "@/utils/article";
 import { articlePageFetchInit } from "@/utils/articlePageCache";
+import { buildArticleOgImageUrl } from "@/utils/ogImage";
 import { renderInlineFormatting } from "@/utils/inlineFormatting";
 import { parseContentLines } from "@/utils/richTextFormat";
 import ArticleJsonLd from "./ArticleJsonLd";
@@ -147,8 +148,9 @@ export async function generateMetadata({
     if (news) {
       const siteBase = SITE_BASE;
 
-      // Route OG image through same-domain endpoint for crawler compatibility (Telegram-safe).
-      const imageUrl = `${siteBase}/api/news/${idParam}/og-image`;
+      // Same-origin OG image; `v` changes with cover/updated_at so Facebook/Telegram
+      // do not keep serving a previously cached photo.
+      const imageUrl = buildArticleOgImageUrl(siteBase, idParam, news);
 
       const title = `${news.title} - The Khmer Today`;
       const descriptionFallback =
