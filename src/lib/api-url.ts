@@ -13,21 +13,22 @@ export function isApiConfigured(): boolean {
 /**
  * Base URL for API calls (includes `/api` segment for direct mode, or `/api-proxy` in proxy mode).
  * When `NEXT_PUBLIC_API_PROXY=1`, the browser calls same-origin `/api-proxy/...` and Next.js rewrites
- * to the real API so CORS does not apply. Server-side fetch uses an absolute URL to that proxy path.
+ * to the real API so CORS does not apply.
+ * Server-side fetch talks to the API origin directly. Routing it back through this deployment
+ * would run another function for every article render.
  */
 export function getApiBaseUrl(): string {
   const useProxy = process.env.NEXT_PUBLIC_API_PROXY === "1";
 
+  if (useProxy && typeof window !== "undefined") {
+    return PROXY_PATH;
+  }
+
   if (useProxy) {
-    if (typeof window !== "undefined") {
-      return PROXY_PATH;
-    }
-    const origin =
-      process.env.VERCEL_URL != null
-        ? `https://${process.env.VERCEL_URL}`
-        : (process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
-          "http://localhost:3000");
-    return `${origin}${PROXY_PATH}`;
+    const upstream = (
+      process.env.API_UPSTREAM_ORIGIN ?? "https://api.thekhmertoday.news"
+    ).replace(/\/$/, "");
+    return `${upstream}/api`;
   }
 
   const base = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "");

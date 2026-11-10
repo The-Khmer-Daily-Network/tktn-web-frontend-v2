@@ -67,11 +67,11 @@ export async function login(
     const user = await getCurrentUser(credentials);
 
     if (user) {
-      // Store user in localStorage for persistence
+      const sessionUser = { ...user, password: "" };
       if (typeof window !== "undefined") {
-        localStorage.setItem("currentUser", JSON.stringify(user));
+        localStorage.setItem("currentUser", JSON.stringify(sessionUser));
       }
-      return user;
+      return sessionUser;
     }
 
     return null;
@@ -103,7 +103,13 @@ export function getStoredUser(): User | null {
     if (!stored) {
       return null;
     }
-    return JSON.parse(stored) as User;
+    const user = JSON.parse(stored) as User;
+    if (user.password) {
+      const sessionUser = { ...user, password: "" };
+      localStorage.setItem("currentUser", JSON.stringify(sessionUser));
+      return sessionUser;
+    }
+    return user;
   } catch (error) {
     console.error("Error parsing stored user:", error);
     return null;

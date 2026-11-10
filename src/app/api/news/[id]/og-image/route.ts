@@ -1,5 +1,6 @@
 import { getApiBaseUrl, isApiConfigured, readApiJson } from "@/lib/api-url";
 import {
+  ARTICLE_PAGE_REVALIDATE_SECONDS,
   articlePageFetchInit,
   ogImageCacheControl,
 } from "@/utils/articlePageCache";
@@ -8,7 +9,7 @@ const SITE_BASE =
   process.env.NEXT_PUBLIC_SITE_URL || "https://www.thekhmertoday.news";
 const DEFAULT_IMAGE = `${SITE_BASE}/assets/TKDN_Logo/TKTN_Logo_Square.png`;
 
-export const revalidate = 300;
+export const revalidate = ARTICLE_PAGE_REVALIDATE_SECONDS;
 
 type NewsMeta = {
   cover?: string | null;

@@ -20,7 +20,8 @@ export async function listUsers(): Promise<User[]> {
   if (!response.ok)
     throw new Error(`Failed to list users: ${response.statusText}`);
   const data: UserResponse = await readApiJson(response);
-  return data.success && Array.isArray(data.data) ? data.data : [];
+  if (!data.success || !Array.isArray(data.data)) return [];
+  return data.data.map((user) => ({ ...user, password: "" }));
 }
 
 /**

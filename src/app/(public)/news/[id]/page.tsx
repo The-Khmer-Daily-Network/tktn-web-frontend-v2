@@ -4,7 +4,10 @@ import type { ReactNode } from "react";
 import { cache } from "react";
 import { getApiBaseUrl, isApiConfigured, readApiJson } from "@/lib/api-url";
 import { getFirstSentenceFromContent } from "@/utils/article";
-import { articlePageFetchInit } from "@/utils/articlePageCache";
+import {
+  ARTICLE_PAGE_REVALIDATE_SECONDS,
+  articlePageFetchInit,
+} from "@/utils/articlePageCache";
 import { buildArticleOgImageUrl } from "@/utils/ogImage";
 import { renderInlineFormatting } from "@/utils/inlineFormatting";
 import { parseContentLines } from "@/utils/richTextFormat";
@@ -15,7 +18,7 @@ const SITE_BASE =
   process.env.NEXT_PUBLIC_SITE_URL || "https://www.thekhmertoday.news";
 
 /** ISR at CDN; cleared on admin save via revalidatePath. */
-export const revalidate = 300;
+export const revalidate = ARTICLE_PAGE_REVALIDATE_SECONDS;
 
 type ContentBlock = { subtitle?: string | null; paragraph?: string };
 type EndImage = { url: string; name?: string | null };

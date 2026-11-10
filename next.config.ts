@@ -4,7 +4,83 @@ import type { NextConfig } from "next";
 const API_UPSTREAM_ORIGIN =
   process.env.API_UPSTREAM_ORIGIN ?? "https://api.thekhmertoday.news";
 
+const isDev = process.env.NODE_ENV === "development";
+
+const MEDIA_HOSTS = [
+  "tkdn-development-v1.sgp1.digitaloceanspaces.com",
+  "tkdn-development-v1.sgp1.cdn.digitaloceanspaces.com",
+  "the-khmer-today.sgp1.digitaloceanspaces.com",
+  "the-khmer-today.sgp1.cdn.digitaloceanspaces.com",
+  "www.reuters.com",
+];
+
+function contentSecurityPolicy(): string {
+  const scriptSrc = [
+    "'self'",
+    "'unsafe-inline'",
+    "https://www.googletagmanager.com",
+    "https://www.google-analytics.com",
+    ...(isDev ? ["'unsafe-eval'"] : []),
+  ];
+  const connectSrc = [
+    "'self'",
+    "https://api.thekhmertoday.news",
+    "https://api.thekhmerdailynetwork.com",
+    "https://www.google-analytics.com",
+    "https://analytics.google.com",
+    "https://*.google-analytics.com",
+    "https://*.analytics.google.com",
+    "https://www.googletagmanager.com",
+    ...(isDev
+      ? [
+          "http://127.0.0.1:8000",
+          "http://localhost:8000",
+          "ws://localhost:3000",
+        ]
+      : []),
+  ];
+  const mediaSrc = [
+    "'self'",
+    "blob:",
+    ...MEDIA_HOSTS.map((host) => `https://${host}`),
+  ];
+
+  return [
+    "default-src 'self'",
+    `script-src ${scriptSrc.join(" ")}`,
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob: https:",
+    "font-src 'self' data:",
+    `connect-src ${connectSrc.join(" ")}`,
+    `media-src ${mediaSrc.join(" ")}`,
+    "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+    ...(isDev ? [] : ["upgrade-insecure-requests"]),
+  ].join("; ");
+}
+
+const securityHeaders = [
+  {
+    key: "Strict-Transport-Security",
+    value: "max-age=31536000; includeSubDomains; preload",
+  },
+  { key: "Content-Security-Policy", value: contentSecurityPolicy() },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "X-XSS-Protection", value: "0" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
+  {
+    key: "Permissions-Policy",
+    value: "geolocation=(), microphone=(), camera=(), browsing-topics=()",
+  },
+];
+
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   async rewrites() {
     return [
       {
@@ -14,59 +90,26 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "tkdn-development-v1.sgp1.digitaloceanspaces.com",
-      },
-      {
-        protocol: "https",
-        hostname: "tkdn-development-v1.sgp1.cdn.digitaloceanspaces.com",
-      },
-      {
-        protocol: "https",
-        hostname: "www.reuters.com",
-      },
-      {
-        protocol: "https",
-        hostname: "**",
-      },
-    ],
+    // A wildcard hostname turns /_next/image into an open proxy that anyone can
+    // use to fetch and resize arbitrary URLs on this project's CPU.
+    minimumCacheTTL: 60 * 60 * 24 * 7,
+    remotePatterns: MEDIA_HOSTS.map((hostname) => ({
+      protocol: "https" as const,
+      hostname,
+    })),
   },
-  // Security headers
   async headers() {
     return [
       {
         source: "/:path*",
+        headers: securityHeaders,
+      },
+      {
+        source: "/assets/:path*",
         headers: [
           {
-            key: "Strict-Transport-Security",
-            value: "max-age=31536000; includeSubDomains; preload",
-          },
-          {
-            key: "Content-Security-Policy",
-            value:
-              "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://api.thekhmerdailynetwork.com http://api.thekhmertoday.news https://api.thekhmertoday.news http://127.0.0.1:8000 http://localhost:8000 https://www.google-analytics.com https://www.googletagmanager.com; media-src 'self' blob: https://tkdn-development-v1.sgp1.digitaloceanspaces.com https://the-khmer-today.sgp1.digitaloceanspaces.com; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com;",
-          },
-          {
-            key: "X-Content-Type-Options",
-            value: "nosniff",
-          },
-          {
-            key: "X-Frame-Options",
-            value: "DENY",
-          },
-          {
-            key: "X-XSS-Protection",
-            value: "1; mode=block",
-          },
-          {
-            key: "Referrer-Policy",
-            value: "strict-origin-when-cross-origin",
-          },
-          {
-            key: "Permissions-Policy",
-            value: "geolocation=(), microphone=(), camera=()",
+            key: "Cache-Control",
+            value: "public, max-age=86400, stale-while-revalidate=604800",
           },
         ],
       },
