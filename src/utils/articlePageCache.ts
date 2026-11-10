@@ -1,7 +1,8 @@
 /**
  * ISR windows — CDN serves cached HTML; admin save + SEO revalidate hook clear stale content.
  */
-export const ARTICLE_PAGE_REVALIDATE_SECONDS = 300;
+/** Editors purge a page on save, so the ISR window can stay long. */
+export const ARTICLE_PAGE_REVALIDATE_SECONDS = 3600;
 export const SITEMAP_REVALIDATE_SECONDS = 3600;
 
 export function cachedFetchInit(revalidateSeconds: number): RequestInit {
@@ -16,5 +17,5 @@ export function articlePageFetchInit(): RequestInit {
 }
 
 export function ogImageCacheControl(): string {
-  return "public, max-age=60, s-maxage=300, stale-while-revalidate=600";
+  return "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400";
 }

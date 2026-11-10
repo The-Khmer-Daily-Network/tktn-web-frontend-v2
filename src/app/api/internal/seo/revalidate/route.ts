@@ -12,7 +12,16 @@ function normalizePaths(paths: unknown): string[] {
   return paths
     .filter((path): path is string => typeof path === "string")
     .map((path) => path.trim())
-    .filter((path) => path.startsWith("/") && path.length <= 500);
+    .filter(
+      (path) =>
+        path.startsWith("/") &&
+        path.length <= 200 &&
+        !path.includes("..") &&
+        !path.includes("//") &&
+        !path.includes("\\") &&
+        !path.includes("\0"),
+    )
+    .slice(0, 20);
 }
 
 export async function POST(request: Request) {

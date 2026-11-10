@@ -15,7 +15,7 @@ const SITE_BASE =
   process.env.NEXT_PUBLIC_SITE_URL || "https://www.thekhmertoday.news";
 
 /** ISR at CDN; cleared on admin save via revalidatePath. */
-export const revalidate = 300;
+export const revalidate = 3600;
 
 type ContentBlock = { subtitle?: string | null; paragraph?: string };
 type EndImage = { url: string; name?: string | null };

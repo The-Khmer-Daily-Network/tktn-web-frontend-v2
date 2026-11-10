@@ -1,9 +1,12 @@
 import Script from "next/script";
 
-export default function GoogleAnalytics() {
-  const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+const GA_ID_PATTERN = /^(G-[A-Z0-9]+|GTM-[A-Z0-9]+|AW-[A-Z0-9]+|UA-\d+-\d+)$/i;
 
-  // If unset, don't inject GA scripts (avoids broken requests and keeps dev clean).
+export default function GoogleAnalytics() {
+  const rawId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim() ?? "";
+  const GA_MEASUREMENT_ID = GA_ID_PATTERN.test(rawId) ? rawId : "";
+
+  // If unset or not a measurement id, don't inject GA scripts.
   if (!GA_MEASUREMENT_ID) return null;
 
   return (
